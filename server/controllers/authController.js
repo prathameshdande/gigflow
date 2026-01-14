@@ -49,22 +49,20 @@ const login = async (req, res, next) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    const token = jwt.sign(
-      { id: user._id },
-      process.env.JWT_KEY,
-      { expiresIn: "3d" }
-    );
+    const token = jwt.sign({ id: user._id }, process.env.JWT_KEY, {
+      expiresIn: "3d",
+    });
 
     const { password: _, ...userData } = user._doc;
 
     res
       .cookie("accessToken", token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production", 
         sameSite: "none",
+        secure: true,
       })
       .status(200)
-      .json(userData);
+      .json(otherDetails);
   } catch (err) {
     next(err);
   }
@@ -74,8 +72,8 @@ const logout = async (req, res) => {
   res
     .clearCookie("accessToken", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
       sameSite: "none",
+      secure: true,
     })
     .status(200)
     .json({ message: "Logged out successfully" });
