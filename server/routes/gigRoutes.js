@@ -1,12 +1,18 @@
-const express = require('express');
-const { createGig, getGigs, getGig } = require('../controllers/gigController');
-const verifyToken = require('../middleware/verifyToken');
-console.log(createGig, getGigs, getGig);
-
+const express = require("express");
 const router = express.Router();
 
-router.post('/', verifyToken, createGig);
-router.get('/', getGigs);
-router.get('/:id', getGig);
+const {
+  createGig,
+  getGigs,
+  getGig
+} = require("../controllers/gigController");
+
+const verifyToken = require("../middleware/verifyToken");
+
+router.get("/", getGigs);
+
+router.get("/:id", getGig);
+
+router.post("/", verifyToken, createGig);
 
 module.exports = router;
