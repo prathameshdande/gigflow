@@ -49,9 +49,11 @@ const login = async (req, res, next) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_KEY, {
-      expiresIn: "3d",
-    });
+    const token = jwt.sign(
+      { id: user._id },
+      process.env.JWT_KEY,
+      { expiresIn: "3d" }
+    );
 
     const { password: _, ...userData } = user._doc;
 
@@ -62,11 +64,12 @@ const login = async (req, res, next) => {
         secure: true,
       })
       .status(200)
-      .json(otherDetails);
+      .json(userData); 
   } catch (err) {
     next(err);
   }
 };
+
 
 const logout = async (req, res) => {
   res
