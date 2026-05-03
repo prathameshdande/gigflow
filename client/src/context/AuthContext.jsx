@@ -16,18 +16,23 @@ export const AuthProvider = ({ children }) => {
     try {
       const res = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         credentials: "include",
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || "Login failed");
+      }
 
-      setUser(data);
+      const userData = await res.json();
+      setUser(userData);
       return { success: true };
     } catch (err) {
-      return { success: false, message: "Invalid credentials" };
+      return { success: false, message: err.message };
     }
   };
 
@@ -35,11 +40,18 @@ export const AuthProvider = ({ children }) => {
     try {
       const res = await fetch(`${API_URL}/auth/register`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
         body: JSON.stringify({ name, email, password }),
       });
 
-      if (!res.ok) throw new Error(await res.text());
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || "Registration failed");
+      }
+
       return { success: true };
     } catch (err) {
       return { success: false, message: err.message };

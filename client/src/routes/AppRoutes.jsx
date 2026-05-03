@@ -9,7 +9,12 @@ import MyBids from "../components/MyBids";
 
 const ProtectedRoute = ({ children }) => {
   const { user } = useAuth();
-  if (!user) return <Navigate to="/auth" replace />;
+  if (!user) {
+    return <Navigate to="/auth" replace />
+  }else{
+    <Navigate to='/client'/>
+  }
+  ;
   return children;
 };
 

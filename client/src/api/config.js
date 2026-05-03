@@ -1,1 +1,1 @@
-export const API_URL = "https://gigflow-jx96.onrender.com/api";
+export const API_URL = "https://gigflow-backend-u6q0.onrender.com";
