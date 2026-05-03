@@ -4,7 +4,7 @@ const dotenv = require("dotenv");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 
-// Route Imports
+// Routes
 const authRoutes = require("./routes/authRoutes");
 const gigRoutes = require("./routes/gigRoutes");
 const bidRoutes = require("./routes/bidRoutes");
@@ -13,53 +13,74 @@ dotenv.config();
 
 const app = express();
 
+/* ---------------- CORS FIX ---------------- */
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://gigflow-umber.vercel.app",
+  "https://gigflow-pi.vercel.app",
+];
+
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://gigflow-umber.vercel.app","https://gigflow-pi.vercel.app"],
+    origin: function (origin, callback) {
+      // allow requests with no origin (like Postman)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error("CORS not allowed"));
+      }
+    },
     credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  }),
+  })
 );
 
+// ✅ handle preflight requests (VERY IMPORTANT)
+app.options("*", cors());
+
+/* ---------------- MIDDLEWARE ---------------- */
 app.use(express.json());
 app.use(cookieParser());
 
-// Database Connection
+/* ---------------- DB CONNECTION ---------------- */
 const connect = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);
-    console.log("Connected to MongoDB");
+    console.log("✅ Connected to MongoDB");
   } catch (error) {
-    console.error("Error connecting to MongoDB:", error);
-    throw error;
+    console.error("❌ MongoDB error:", error);
   }
 };
 
 mongoose.connection.on("disconnected", () => {
-  console.log("MongoDB disconnected");
+  console.log("⚠ MongoDB disconnected");
 });
 
-// Routes Middleware
+/* ---------------- ROUTES ---------------- */
 app.use("/api/auth", authRoutes);
 app.use("/api/gigs", gigRoutes);
 app.use("/api/bids", bidRoutes);
 
-// Global Error Handler
+/* ---------------- ROOT CHECK ---------------- */
+app.get("/", (req, res) => {
+  res.send("🚀 GigFlow API is running...");
+});
+
+/* ---------------- ERROR HANDLER ---------------- */
 app.use((err, req, res, next) => {
-  const errorStatus = err.status || 500;
-  const errorMessage = err.message || "Something went wrong!";
-  return res.status(errorStatus).json({
+  console.error("🔥 ERROR:", err.message);
+
+  res.status(err.status || 500).json({
     success: false,
-    status: errorStatus,
-    message: errorMessage,
-    stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
+    message: err.message || "Something went wrong!",
   });
 });
 
+/* ---------------- SERVER ---------------- */
 const PORT = process.env.PORT || 8800;
 
 app.listen(PORT, () => {
   connect();
-  console.log(`Backend server running on port ${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
