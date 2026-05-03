@@ -13,16 +13,14 @@ dotenv.config();
 
 const app = express();
 
-
 app.use(
   cors({
-    origin: "https://gigflow-umber.vercel.app",
+    origin: ["http://localhost:5173", "https://gigflow-umber.vercel.app","https://gigflow-pi.vercel.app"],
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-  })
+  }),
 );
-
 
 app.use(express.json());
 app.use(cookieParser());
@@ -46,7 +44,6 @@ mongoose.connection.on("disconnected", () => {
 app.use("/api/auth", authRoutes);
 app.use("/api/gigs", gigRoutes);
 app.use("/api/bids", bidRoutes);
-
 
 // Global Error Handler
 app.use((err, req, res, next) => {
