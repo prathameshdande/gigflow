@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Search, Loader2, DollarSign, Clock, IndianRupee } from "lucide-react";
+import { Search, Loader2, IndianRupee, Clock } from "lucide-react";
 import { API_URL } from "../api/config";
 import { useNavigate } from "react-router-dom";
 
@@ -69,8 +69,7 @@ const GigList = () => {
             <div
               key={gig._id}
               onClick={() => navigate(`/gigs/${gig._id}`)}
-              className="group bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer flex flex-col"
-            >
+              className="group bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer flex flex-col">
               <div className="p-6 flex-1">
                 <div className="flex justify-between items-center mb-3">
                   <span
@@ -78,8 +77,7 @@ const GigList = () => {
                       gig.status === "open"
                         ? "bg-emerald-100 text-emerald-700"
                         : "bg-slate-100 text-slate-600"
-                    }`}
-                  >
+                    }`}>
                     {(gig.status || "open").toUpperCase()}
                   </span>
 

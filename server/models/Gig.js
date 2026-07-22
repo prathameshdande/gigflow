@@ -7,28 +7,28 @@ const GigSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    title: {
-      type: String,
-      required: true,
-    },
-    desc: {
-      type: String,
-      required: true,
-    },
-    budget: {
-      type: Number,
-      required: true,
-    },
+    title: { type: String, required: true },
+    desc: { type: String, required: true },
+    budget: { type: Number, required: true },
+    deadline: Date,
     status: {
       type: String,
-      enum: ["open", "assigned"],
+      enum: ["open", "assigned", "inProgress", "completed", "closed"],
       default: "open",
     },
+    assignedTo: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+    submission: {
+      files: [String],
+      message: String,
+      submittedAt: Date,
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
-// Text index to enable search functionality
 GigSchema.index({ title: "text" });
-
 module.exports = mongoose.model("Gig", GigSchema);

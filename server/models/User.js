@@ -1,21 +1,23 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const UserSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
+const UserSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    role: {
+      type: String,
+      enum: ["client", "freelancer", "admin"],
+      default: "client",
+    },
+    skills: [String],
+    bio: String,
+    avatar: String,
+    isActive: { type: Boolean, default: true },
+    resetPasswordToken: String,
+    resetPasswordExpires: Date,
   },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  password: {
-    type: String,
-    required: true,
-  },
-  // In this app, roles are fluid, so we don't strictly need a 'role' field
-  // unless you want to track if they are primarily a client or freelancer.
-}, { timestamps: true });
+  { timestamps: true },
+);
 
-module.exports = mongoose.model('User', UserSchema);
+module.exports = mongoose.model("User", UserSchema);

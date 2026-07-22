@@ -1,4 +1,12 @@
-import { Briefcase, LogOut, PlusCircle, List } from "lucide-react";
+import {
+  Briefcase,
+  LogOut,
+  PlusCircle,
+  List,
+  User,
+  CreditCard,
+  Shield,
+} from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -21,24 +29,36 @@ const Navbar = () => {
 
         {user ? (
           <div className="flex items-center gap-5">
-            <Link to="/" className="flex items-center gap-1 text-sm hover:text-emerald-400">
-              <List size={16} />
-              Gigs
+            <Link
+              to="/"
+              className="flex items-center gap-1 text-sm hover:text-emerald-400">
+              <List size={16} /> Gigs
             </Link>
-
-            <Link to="/create" className="flex items-center gap-1 text-sm hover:text-emerald-400">
-              <PlusCircle size={16} />
-              Post Gig
+            <Link
+              to="/create"
+              className="flex items-center gap-1 text-sm hover:text-emerald-400">
+              <PlusCircle size={16} /> Post Gig
             </Link>
-
             <Link to="/my-bids" className="text-sm hover:text-emerald-400">
               My Bids
             </Link>
-
-            <span className="hidden sm:block text-sm text-slate-300">
-              {user.name}
-            </span>
-
+            <Link
+              to="/my-payments"
+              className="flex items-center gap-1 text-sm hover:text-emerald-400">
+              <CreditCard size={16} /> Payments
+            </Link>
+            <Link
+              to="/profile"
+              className="flex items-center gap-1 text-sm hover:text-emerald-400">
+              <User size={16} /> Profile
+            </Link>
+            {user.role === "admin" && (
+              <Link
+                to="/admin"
+                className="flex items-center gap-1 text-sm hover:text-emerald-400">
+                <Shield size={16} /> Admin
+              </Link>
+            )}
             <button onClick={handleLogout} className="hover:text-red-400">
               <LogOut size={18} />
             </button>
