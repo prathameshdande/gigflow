@@ -130,7 +130,13 @@ const NavItems = ({ user, location, closeMenu }) => {
         Payments
       </Link>
 
-      <NotificationBell />
+      <Link
+          to="/my-payments"
+          onClick={closeMenu}
+          className={linkStyle("/my-payments")}
+        >
+          <NotificationBell/> Notification
+        </Link>
 
       <Link to="/profile" onClick={closeMenu} className={linkStyle("/profile")}>
         <span className="flex items-center gap-2">
