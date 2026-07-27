@@ -90,16 +90,12 @@ const NavItems = ({ user, location, closeMenu }) => {
           Payments
         </Link>
 
-        <Link
-          to="/notifications"
-          onClick={closeMenu}
-          className={linkStyle("/notifications")}
-        >
-          <span className="flex items-center gap-2">
-            <NotificationBell />
-            <span className="font-medium">Notifications</span>
+        <div className="flex items-center gap-2 rounded-2xl px-4 py-2">
+          <NotificationBell />
+          <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
+            Notifications
           </span>
-        </Link>
+        </div>
 
         <Link
           to="/profile"
@@ -138,7 +134,7 @@ const NavItems = ({ user, location, closeMenu }) => {
         onClick={closeMenu}
         className={linkStyle("/notifications")}
       >
-        <span className="flex items-center gap-2">
+        <span className="flex items-center gap-0.5">
           <NotificationBell />
           <span className="font-medium">Notifications</span>
         </span>
