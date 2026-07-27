@@ -91,11 +91,14 @@ const NavItems = ({ user, location, closeMenu }) => {
         </Link>
 
         <Link
-          to="/my-payments"
+          to="/notifications"
           onClick={closeMenu}
-          className={linkStyle("/my-payments")}
+          className={linkStyle("/notifications")}
         >
-          <NotificationBell/> Notification
+          <span className="flex items-center gap-2">
+            <NotificationBell />
+            <span className="font-medium">Notifications</span>
+          </span>
         </Link>
 
         <Link
@@ -131,12 +134,15 @@ const NavItems = ({ user, location, closeMenu }) => {
       </Link>
 
       <Link
-          to="/my-payments"
-          onClick={closeMenu}
-          className={linkStyle("/my-payments")}
-        >
-          <NotificationBell/> Notification
-        </Link>
+        to="/notifications"
+        onClick={closeMenu}
+        className={linkStyle("/notifications")}
+      >
+        <span className="flex items-center gap-2">
+          <NotificationBell />
+          <span className="font-medium">Notifications</span>
+        </span>
+      </Link>
 
       <Link to="/profile" onClick={closeMenu} className={linkStyle("/profile")}>
         <span className="flex items-center gap-2">
