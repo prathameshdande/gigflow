@@ -3,6 +3,7 @@ import { API_URL } from "../api/config";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { motion } from "framer-motion";
+import toast from "react-hot-toast";
 import {
   Briefcase,
   ArrowLeft,
@@ -34,14 +35,18 @@ const MyBids = () => {
 
   const fetchBids = async () => {
     try {
-      const res = await fetch(`${API_URL}/bids/my`, { credentials: "include" });
+      const res = await fetch(`${API_URL}/bids/my`, {
+        credentials: "include",
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
       if (res.status === 401) {
         localStorage.removeItem("currentUser");
+        localStorage.removeItem("token");
         navigate("/auth");
         return;
       }
       const data = await res.json();
-      setBids(data);
+      setBids(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error(err);
     } finally {
@@ -51,11 +56,22 @@ const MyBids = () => {
 
   const withdrawBid = async (id) => {
     if (!confirm("Withdraw this bid?")) return;
-    await fetch(`${API_URL}/bids/${id}`, {
-      method: "DELETE",
-      credentials: "include",
-    });
-    setBids((prev) => prev.filter((b) => b._id !== id));
+    try {
+      const res = await fetch(`${API_URL}/bids/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      if (res.ok) {
+        setBids((prev) => prev.filter((b) => b._id !== id));
+      } else {
+        const data = await res.json().catch(() => ({}));
+        toast.error(data.message || "Failed to withdraw bid");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to withdraw bid");
+    }
   };
 
   const startEdit = (bid) => {
@@ -68,7 +84,10 @@ const MyBids = () => {
   const saveEdit = async (bidId) => {
     const res = await fetch(`${API_URL}/bids/${bidId}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
       credentials: "include",
       body: JSON.stringify({
         price: Number(editForm.price),

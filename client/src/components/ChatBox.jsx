@@ -31,6 +31,7 @@ const ChatBox = ({ gigId, receiverId, token }) => {
 
     fetch(`${API_URL}/messages/${gigId}`, {
       credentials: "include",
+      headers: { Authorization: `Bearer ${token}` },
     })
       .then(async (res) => {
         const data = await res.json();

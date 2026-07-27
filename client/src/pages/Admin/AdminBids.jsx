@@ -1,16 +1,33 @@
 // src/pages/Admin/AdminBids.jsx
 import { useEffect, useState } from "react";
 import { API_URL } from "../../api/config";
+import toast from "react-hot-toast";
+
+const authHeaders = () => ({
+  Authorization: `Bearer ${localStorage.getItem("token")}`,
+});
 
 const AdminBids = () => {
   const [bids, setBids] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const fetchBids = async () => {
-    const res = await fetch(`${API_URL}/admin/bids`, {
-      credentials: "include",
-    });
-    const data = await res.json();
-    setBids(data);
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`${API_URL}/admin/bids`, {
+        credentials: "include",
+        headers: authHeaders(),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to load bids");
+      setBids(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -18,20 +35,37 @@ const AdminBids = () => {
   }, []);
 
   const approveBid = async (bidId) => {
-    await fetch(`${API_URL}/admin/bids/${bidId}/approve`, {
-      method: "PATCH",
-      credentials: "include",
-    });
-    fetchBids();
+    try {
+      const res = await fetch(`${API_URL}/admin/bids/${bidId}/approve`, {
+        method: "PATCH",
+        credentials: "include",
+        headers: authHeaders(),
+      });
+      if (res.ok) fetchBids();
+      else toast.error("Failed to approve bid");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to approve bid");
+    }
   };
 
   const markSpam = async (bidId) => {
-    await fetch(`${API_URL}/admin/bids/${bidId}/spam`, {
-      method: "PATCH",
-      credentials: "include",
-    });
-    fetchBids();
+    try {
+      const res = await fetch(`${API_URL}/admin/bids/${bidId}/spam`, {
+        method: "PATCH",
+        credentials: "include",
+        headers: authHeaders(),
+      });
+      if (res.ok) fetchBids();
+      else toast.error("Failed to mark bid as spam");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to mark bid as spam");
+    }
   };
+
+  if (loading) return <div className="text-slate-500">Loading...</div>;
+  if (error) return <div className="text-red-500">{error}</div>;
 
   return (
     <div>

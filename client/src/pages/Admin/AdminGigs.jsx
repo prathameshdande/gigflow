@@ -1,16 +1,33 @@
 // src/pages/Admin/AdminGigs.jsx
 import { useEffect, useState } from "react";
 import { API_URL } from "../../api/config";
+import toast from "react-hot-toast";
+
+const authHeaders = () => ({
+  Authorization: `Bearer ${localStorage.getItem("token")}`,
+});
 
 const AdminGigs = () => {
   const [gigs, setGigs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const fetchGigs = async () => {
-    const res = await fetch(`${API_URL}/admin/gigs`, {
-      credentials: "include",
-    });
-    const data = await res.json();
-    setGigs(data);
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`${API_URL}/admin/gigs`, {
+        credentials: "include",
+        headers: authHeaders(),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to load gigs");
+      setGigs(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -18,23 +35,39 @@ const AdminGigs = () => {
   }, []);
 
   const updateStatus = async (id, status) => {
-    await fetch(`${API_URL}/admin/gigs/${id}/status`, {
-      method: "PATCH",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status }),
-    });
-    fetchGigs();
+    try {
+      const res = await fetch(`${API_URL}/admin/gigs/${id}/status`, {
+        method: "PATCH",
+        credentials: "include",
+        headers: { "Content-Type": "application/json", ...authHeaders() },
+        body: JSON.stringify({ status }),
+      });
+      if (res.ok) fetchGigs();
+      else toast.error("Failed to update gig status");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update gig status");
+    }
   };
 
   const deleteGig = async (id) => {
     if (!confirm("Delete this gig?")) return;
-    await fetch(`${API_URL}/admin/gigs/${id}`, {
-      method: "DELETE",
-      credentials: "include",
-    });
-    fetchGigs();
+    try {
+      const res = await fetch(`${API_URL}/admin/gigs/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+        headers: authHeaders(),
+      });
+      if (res.ok) fetchGigs();
+      else toast.error("Failed to delete gig");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to delete gig");
+    }
   };
+
+  if (loading) return <div className="text-slate-500">Loading...</div>;
+  if (error) return <div className="text-red-500">{error}</div>;
 
   return (
     <div>

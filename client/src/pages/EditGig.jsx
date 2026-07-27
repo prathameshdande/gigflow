@@ -21,12 +21,19 @@ const EditGig = () => {
     e.preventDefault();
     const res = await fetch(`${API_URL}/gigs/${id}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
       credentials: "include",
       body: JSON.stringify(form),
     });
-    if (res.ok) navigate(`/gigs/${id}`);
-    else alert(await res.text());
+    if (res.ok) {
+      navigate(`/gigs/${id}`);
+    } else {
+      const data = await res.json().catch(() => ({}));
+      alert(data.message || "Failed to update gig");
+    }
   };
 
   return (

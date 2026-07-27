@@ -24,6 +24,7 @@ const AdminOverview = () => {
       try {
         const res = await fetch(`${API_URL}/admin/stats`, {
           credentials: "include",
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         if (res.ok) {
           setStats(await res.json());

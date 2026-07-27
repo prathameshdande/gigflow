@@ -1,16 +1,33 @@
 // src/pages/Admin/AdminUsers.jsx
 import { useEffect, useState } from "react";
 import { API_URL } from "../../api/config";
+import toast from "react-hot-toast";
+
+const authHeaders = () => ({
+  Authorization: `Bearer ${localStorage.getItem("token")}`,
+});
 
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const fetchUsers = async () => {
-    const res = await fetch(`${API_URL}/admin/users`, {
-      credentials: "include",
-    });
-    const data = await res.json();
-    setUsers(data);
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`${API_URL}/admin/users`, {
+        credentials: "include",
+        headers: authHeaders(),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to load users");
+      setUsers(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -18,21 +35,41 @@ const AdminUsers = () => {
   }, []);
 
   const toggleStatus = async (id) => {
-    await fetch(`${API_URL}/admin/users/${id}/toggle`, {
-      method: "PATCH",
-      credentials: "include",
-    });
-    fetchUsers();
+    try {
+      const res = await fetch(`${API_URL}/admin/users/${id}/toggle`, {
+        method: "PATCH",
+        credentials: "include",
+        headers: authHeaders(),
+      });
+      if (res.ok) fetchUsers();
+      else toast.error("Failed to update user status");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update user status");
+    }
   };
 
   const deleteUser = async (id) => {
     if (!confirm("Delete this user?")) return;
-    await fetch(`${API_URL}/admin/users/${id}`, {
-      method: "DELETE",
-      credentials: "include",
-    });
-    fetchUsers();
+    try {
+      const res = await fetch(`${API_URL}/admin/users/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+        headers: authHeaders(),
+      });
+      if (res.ok) fetchUsers();
+      else {
+        const data = await res.json().catch(() => ({}));
+        toast.error(data.message || "Failed to delete user");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to delete user");
+    }
   };
+
+  if (loading) return <div className="text-slate-500">Loading...</div>;
+  if (error) return <div className="text-red-500">{error}</div>;
 
   return (
     <div>

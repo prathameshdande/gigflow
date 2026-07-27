@@ -1,15 +1,32 @@
 import { useEffect, useState } from "react";
 import { API_URL } from "../../api/config";
+import toast from "react-hot-toast";
+
+const authHeaders = () => ({
+  Authorization: `Bearer ${localStorage.getItem("token")}`,
+});
 
 const AdminPayments = () => {
   const [payments, setPayments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const fetchPayments = async () => {
-    const res = await fetch(`${API_URL}/admin/payments`, {
-      credentials: "include",
-    });
-    const data = await res.json();
-    setPayments(data);
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`${API_URL}/admin/payments`, {
+        credentials: "include",
+        headers: authHeaders(),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to load payments");
+      setPayments(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -17,23 +34,47 @@ const AdminPayments = () => {
   }, []);
 
   const handleDispute = async (paymentId, resolution) => {
-    await fetch(`${API_URL}/admin/dispute/${paymentId}`, {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ resolution }),
-    });
-    fetchPayments();
+    try {
+      const res = await fetch(`${API_URL}/admin/dispute/${paymentId}`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json", ...authHeaders() },
+        body: JSON.stringify({ resolution }),
+      });
+      if (res.ok) {
+        fetchPayments();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        toast.error(data.message || "Failed to resolve dispute");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to resolve dispute");
+    }
   };
 
   const confirmPayment = async (paymentId) => {
     if (!window.confirm("Confirm this payment?")) return;
-    await fetch(`${API_URL}/admin/payments/${paymentId}/confirm`, {
-      method: "PATCH",
-      credentials: "include",
-    });
-    fetchPayments();
+    try {
+      const res = await fetch(`${API_URL}/admin/payments/${paymentId}/confirm`, {
+        method: "PATCH",
+        credentials: "include",
+        headers: authHeaders(),
+      });
+      if (res.ok) {
+        fetchPayments();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        toast.error(data.message || "Failed to confirm payment");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to confirm payment");
+    }
   };
+
+  if (loading) return <div className="text-slate-500">Loading...</div>;
+  if (error) return <div className="text-red-500">{error}</div>;
 
   return (
     <div>

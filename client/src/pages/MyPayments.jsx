@@ -2,18 +2,38 @@ import { useEffect, useState } from "react";
 import { API_URL } from "../api/config";
 import { Loader2, IndianRupee, CheckCircle } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import toast from "react-hot-toast";
 
 const MyPayments = () => {
   const { user } = useAuth();
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const fetchPayments = () => {
     setLoading(true);
-    fetch(`${API_URL}/payments/my`, { credentials: "include" })
-      .then((res) => res.json())
-      .then((data) => setPayments(data))
-      .catch(console.error)
+    setError(null);
+
+    fetch(`${API_URL}/payments/my`, {
+      credentials: "include",
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+    })
+      .then(async (res) => {
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.message || "Failed to load payments");
+        }
+
+        // Guard against a non-array response so a bad response can never
+        // crash the page - show an error state instead.
+        setPayments(Array.isArray(data) ? data : []);
+      })
+      .catch((err) => {
+        console.error(err);
+        setError(err.message);
+        setPayments([]);
+      })
       .finally(() => setLoading(false));
   };
 
@@ -24,14 +44,25 @@ const MyPayments = () => {
 
   const confirmPayment = async (paymentId) => {
     if (!confirm("Confirm this payment?")) return;
-    const res = await fetch(`${API_URL}/payments/${paymentId}/confirm`, {
-      method: "PATCH",
-      credentials: "include",
-    });
-    if (res.ok) {
-      fetchPayments(); // refresh list
-    } else {
-      alert(await res.text());
+
+    try {
+      const res = await fetch(`${API_URL}/payments/${paymentId}/confirm`, {
+        method: "PATCH",
+        credentials: "include",
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        toast.success("Payment confirmed");
+        fetchPayments();
+      } else {
+        toast.error(data.message || "Failed to confirm payment");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to confirm payment");
     }
   };
 
@@ -39,6 +70,19 @@ const MyPayments = () => {
     return (
       <div className="flex justify-center py-20">
         <Loader2 className="animate-spin w-8 h-8 text-emerald-600" />
+      </div>
+    );
+
+  if (error)
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-10 text-center">
+        <p className="text-red-500">{error}</p>
+        <button
+          onClick={fetchPayments}
+          className="mt-4 rounded-lg bg-slate-900 px-4 py-2 text-sm text-white dark:bg-white dark:text-slate-900"
+        >
+          Retry
+        </button>
       </div>
     );
 

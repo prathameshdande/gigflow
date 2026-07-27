@@ -1,24 +1,52 @@
 // src/pages/Admin/AdminReviews.jsx
 import { useEffect, useState } from "react";
 import { API_URL } from "../../api/config";
+import toast from "react-hot-toast";
+
+const authHeaders = () => ({
+  Authorization: `Bearer ${localStorage.getItem("token")}`,
+});
 
 const AdminReviews = () => {
   const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch(`${API_URL}/admin/reviews`, { credentials: "include" })
-      .then((res) => res.json())
-      .then(setReviews);
+    fetch(`${API_URL}/admin/reviews`, {
+      credentials: "include",
+      headers: authHeaders(),
+    })
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || "Failed to load reviews");
+        setReviews(Array.isArray(data) ? data : []);
+      })
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
   }, []);
 
   const deleteReview = async (reviewId) => {
     if (!window.confirm("Delete this review?")) return;
-    await fetch(`${API_URL}/admin/reviews/${reviewId}`, {
-      method: "DELETE",
-      credentials: "include",
-    });
-    setReviews((prev) => prev.filter((r) => r._id !== reviewId));
+    try {
+      const res = await fetch(`${API_URL}/admin/reviews/${reviewId}`, {
+        method: "DELETE",
+        credentials: "include",
+        headers: authHeaders(),
+      });
+      if (res.ok) {
+        setReviews((prev) => prev.filter((r) => r._id !== reviewId));
+      } else {
+        toast.error("Failed to remove review");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to remove review");
+    }
   };
+
+  if (loading) return <div className="text-slate-500">Loading...</div>;
+  if (error) return <div className="text-red-500">{error}</div>;
 
   return (
     <div>
