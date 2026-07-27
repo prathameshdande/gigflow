@@ -7,6 +7,7 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const http = require("http");
 const helmet = require("helmet");
+const compression = require("compression");
 const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
 const mongoSanitize = require("express-mongo-sanitize");
@@ -54,6 +55,7 @@ const allowedOrigins = [
 app.set("trust proxy", 1);
 
 app.use(helmet());
+app.use(compression());
 app.use(
   cors({
     origin: function (origin, callback) {
@@ -159,6 +161,20 @@ app.use((err, req, res, next) => {
 
 initSocket(server, allowedOrigins);
 
+// Once connected, log (don't crash on) transient DB blips - e.g. Atlas
+// free-tier idle disconnects, or a brief network hiccup on Render. The
+// MongoDB driver reconnects automatically; these listeners just make that
+// visible in the logs instead of it looking like the app silently hung.
+mongoose.connection.on("error", (err) => {
+  console.error("MongoDB connection error:", err.message);
+});
+mongoose.connection.on("disconnected", () => {
+  console.warn("MongoDB disconnected - driver will attempt to reconnect");
+});
+mongoose.connection.on("reconnected", () => {
+  console.log("MongoDB reconnected");
+});
+
 const connectDB = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);
@@ -183,6 +199,22 @@ connectDB();
 process.on("SIGTERM", () => {
   console.log("SIGTERM received, shutting down gracefully");
   server.close(() => mongoose.connection.close(false).then(() => process.exit(0)));
+});
+
+// Without these, an uncaught error anywhere outside an Express request
+// handler (e.g. a stray promise rejection in a background task) crashes
+// the process with just a bare Node stack trace, which on a host like
+// Render just looks like the app randomly died. Log clearly, then exit so
+// the platform's process manager restarts it cleanly rather than leaving
+// it in an unknown state.
+process.on("unhandledRejection", (reason) => {
+  console.error("UNHANDLED REJECTION - shutting down:", reason);
+  process.exit(1);
+});
+
+process.on("uncaughtException", (err) => {
+  console.error("UNCAUGHT EXCEPTION - shutting down:", err);
+  process.exit(1);
 });
 
 module.exports = app;

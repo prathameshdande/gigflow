@@ -1,28 +1,34 @@
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { Suspense, lazy } from "react";
 import { useAuth } from "../context/AuthContext";
 
 import Navbar from "../components/Navbar";
 import GigList from "../components/GigList";
-import GigDetail from "../components/GigDetail";
-import CreateGig from "../components/CreateGig";
-import AuthPage from "../components/AuthPage";
-import MyBids from "../components/MyBids";
 
-import ProfilePage from "../pages/ProfilePage";
-import ForgotPasswordPage from "../pages/ForgotPasswordPage";
-import ResetPasswordPage from "../pages/ResetPasswordPage";
-import EditGig from "../pages/EditGig";
-import MyPayments from "../pages/MyPayments";
+// Route-level code splitting: everything below is only fetched when the
+// person actually navigates there, instead of being parsed up front on
+// every page load. This matters most for the admin panel (8 pages) that
+// the vast majority of visitors never touch.
+const GigDetail = lazy(() => import("../components/GigDetail"));
+const CreateGig = lazy(() => import("../components/CreateGig"));
+const AuthPage = lazy(() => import("../components/AuthPage"));
+const MyBids = lazy(() => import("../components/MyBids"));
+
+const ProfilePage = lazy(() => import("../pages/ProfilePage"));
+const ForgotPasswordPage = lazy(() => import("../pages/ForgotPasswordPage"));
+const ResetPasswordPage = lazy(() => import("../pages/ResetPasswordPage"));
+const EditGig = lazy(() => import("../pages/EditGig"));
+const MyPayments = lazy(() => import("../pages/MyPayments"));
 
 // Admin
-import AdminDashboard from "../pages/Admin/AdminDashboard";
-import AdminOverview from "../pages/Admin/AdminOverview";
-import AdminUsers from "../pages/Admin/AdminUsers";
-import AdminGigs from "../pages/Admin/AdminGigs";
-import AdminBids from "../pages/Admin/AdminBids";
-import AdminMessages from "../pages/Admin/AdminMessages";
-import AdminPayments from "../pages/Admin/AdminPayments";
-import AdminReviews from "../pages/Admin/AdminReviews";
+const AdminDashboard = lazy(() => import("../pages/Admin/AdminDashboard"));
+const AdminOverview = lazy(() => import("../pages/Admin/AdminOverview"));
+const AdminUsers = lazy(() => import("../pages/Admin/AdminUsers"));
+const AdminGigs = lazy(() => import("../pages/Admin/AdminGigs"));
+const AdminBids = lazy(() => import("../pages/Admin/AdminBids"));
+const AdminMessages = lazy(() => import("../pages/Admin/AdminMessages"));
+const AdminPayments = lazy(() => import("../pages/Admin/AdminPayments"));
+const AdminReviews = lazy(() => import("../pages/Admin/AdminReviews"));
 
 const Loader = () => (
   <div className="flex min-h-screen items-center justify-center">
@@ -104,7 +110,8 @@ export default function AppRoutes() {
         )}
 
         <div className="relative z-10">
-          <Routes>
+          <Suspense fallback={<Loader />}>
+            <Routes>
             {/* Public */}
 
             <Route path="/" element={<GigList />} />
@@ -196,7 +203,8 @@ export default function AppRoutes() {
             </Route>
 
             <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+            </Routes>
+          </Suspense>
         </div>
       </main>
     </div>

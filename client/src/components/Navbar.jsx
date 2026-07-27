@@ -158,7 +158,7 @@ const Navbar = () => {
       animate={{ y: 0 }}
       transition={{ duration: 0.6 }}
       className="sticky top-4 z-50 mx-auto w-[96%] max-w-7xl">
-      <div className="rounded-3xl border border-white/20 bg-white/70 dark:bg-black/40 backdrop-blur-2xl shadow-2xl">
+      <div className="rounded-3xl border border-white/20 bg-white/90 dark:bg-slate-950/85 backdrop-blur-sm shadow-2xl">
         <div className="flex h-20 items-center justify-between px-7">
           <Link to="/" className="flex items-center gap-4">
             <motion.div

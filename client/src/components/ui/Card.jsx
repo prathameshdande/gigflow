@@ -22,15 +22,15 @@ const Card = ({
         duration: 0.25,
       }}
       className={clsx(
-        "relative overflow-hidden rounded-3xl border border-slate-200/70 bg-white/75 backdrop-blur-2xl shadow-xl dark:border-white/10 dark:bg-white/5",
+        "relative overflow-hidden rounded-3xl border border-slate-200/70 bg-white/80 backdrop-blur-md shadow-xl dark:border-white/10 dark:bg-white/5",
         padding,
         className,
       )}>
       {glow && (
         <>
-          <div className="absolute -top-20 -right-20 h-44 w-44 rounded-full bg-blue-500/10 blur-3xl dark:bg-cyan-400/10" />
+          <div className="absolute -top-20 -right-20 h-44 w-44 rounded-full bg-blue-500/10 blur-2xl dark:bg-cyan-400/10" />
 
-          <div className="absolute -bottom-24 -left-20 h-52 w-52 rounded-full bg-violet-500/10 blur-3xl dark:bg-indigo-500/10" />
+          <div className="absolute -bottom-24 -left-20 h-52 w-52 rounded-full bg-violet-500/10 blur-2xl dark:bg-indigo-500/10" />
         </>
       )}
 
