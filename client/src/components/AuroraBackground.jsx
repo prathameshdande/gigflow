@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
 
 const blobs = [
@@ -42,6 +42,7 @@ const blobs = [
 
 const AuroraBackground = () => {
   const { theme } = useTheme();
+  const shouldReduceMotion = useReducedMotion();
 
   return (
     <div className="fixed inset-0 -z-50 overflow-hidden">
@@ -54,23 +55,17 @@ const AuroraBackground = () => {
       {blobs.map((blob, index) => (
         <motion.div
           key={index}
-          initial={{
-            scale: 1,
-            rotate: 0,
+          animate={shouldReduceMotion ? undefined : {
+            x: [0, 35, -25, 0],
+            y: [0, -25, 25, 0],
           }}
-          animate={{
-            x: [0, 60, -40, 0],
-            y: [0, -40, 40, 0],
-            rotate: [0, 120, 240, 360],
-            scale: [1, 1.2, 0.9, 1],
-          }}
-          transition={{
+          transition={shouldReduceMotion ? undefined : {
             repeat: Infinity,
             ease: "linear",
             duration: blob.duration,
             delay: blob.delay,
           }}
-          className={`absolute rounded-full blur-[120px] bg-gradient-to-br ${
+          className={`absolute rounded-full blur-[80px] bg-gradient-to-br ${
             theme === "dark" ? blob.dark : blob.light
           }`}
           style={{

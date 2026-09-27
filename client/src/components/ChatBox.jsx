@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, MessageCircle, ShieldCheck, Circle } from "lucide-react";
@@ -11,6 +11,14 @@ import Input from "./ui/Input";
 import Button from "./ui/Button";
 import EmptyState from "./ui/EmptyState";
 
+const mergeMessages = (current, incoming) => {
+  const messagesById = new Map(current.map((message) => [message._id, message]));
+  incoming.forEach((message) => messagesById.set(message._id, message));
+
+  return [...messagesById.values()].sort(
+    (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
+  );
+};
 
 
 const ChatBox = ({ gigId, receiverId, token }) => {
@@ -19,11 +27,19 @@ const ChatBox = ({ gigId, receiverId, token }) => {
 
   const [messages, setMessages] = useState([]);
   const [newMsg, setNewMsg] = useState("");
+  const [hasOlderMessages, setHasOlderMessages] = useState(false);
+  const [loadingOlderMessages, setLoadingOlderMessages] = useState(false);
   const bottomRef = useRef(null);
+  const messageListRef = useRef(null);
+  const olderScrollRef = useRef(null);
 
   useEffect(() => {
     if (!token || !gigId || !receiverId) return;
 
+    const controller = new AbortController();
+    setMessages([]);
+    setHasOlderMessages(false);
+    setLoadingOlderMessages(false);
     socketRef.current = io(API_URL.replace("/api", ""), {
       auth: { token },
       transports: ["websocket"],
@@ -31,23 +47,22 @@ const ChatBox = ({ gigId, receiverId, token }) => {
 
     fetch(`${API_URL}/messages/${gigId}`, {
       credentials: "include",
+      signal: controller.signal,
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(async (res) => {
+        if (!res.ok) throw new Error("Unable to load chat history");
         const data = await res.json();
-        console.log("Fetched Messages:", data);
-        setMessages(Array.isArray(data) ? data : []);
+        setMessages((current) => mergeMessages(current, data.messages || []));
+        setHasOlderMessages(Boolean(data.hasMore));
       })
       .catch((err) => {
-        console.error(err);
-        setMessages([]);
+        if (err.name !== "AbortError") console.error(err);
       });
     
     socketRef.current.emit("joinRoom", gigId);
 
     socketRef.current.on("newMessage", (msg) => {
-      console.log("Realtime:", msg);
-
       setMessages((prev) => {
         const exists = prev.some((m) => m._id === msg._id);
 
@@ -57,6 +72,7 @@ const ChatBox = ({ gigId, receiverId, token }) => {
       });
     });
     return () => {
+      controller.abort();
       if (socketRef.current) {
         socketRef.current.off("newMessage");
         socketRef.current.disconnect();
@@ -66,11 +82,50 @@ const ChatBox = ({ gigId, receiverId, token }) => {
 
   }, [token, gigId, receiverId]);
 
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({
-      behavior: "smooth",
-    });
+  useLayoutEffect(() => {
+    if (olderScrollRef.current && messageListRef.current) {
+      const { height, top } = olderScrollRef.current;
+      const list = messageListRef.current;
+      list.scrollTop = top + (list.scrollHeight - height);
+      olderScrollRef.current = null;
+      return;
+    }
+
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  const loadOlderMessages = async () => {
+    if (loadingOlderMessages || !hasOlderMessages || messages.length === 0) return;
+
+    const list = messageListRef.current;
+    setLoadingOlderMessages(true);
+    try {
+      const params = new URLSearchParams({
+        limit: "50",
+        before: messages[0].createdAt,
+        beforeId: messages[0]._id,
+      });
+      const res = await fetch(`${API_URL}/messages/${gigId}?${params}`, {
+        credentials: "include",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Unable to load older messages");
+
+      const data = await res.json();
+      if (list) {
+        olderScrollRef.current = {
+          height: list.scrollHeight,
+          top: list.scrollTop,
+        };
+      }
+      setMessages((current) => mergeMessages(data.messages || [], current));
+      setHasOlderMessages(Boolean(data.hasMore));
+    } catch (error) {
+      console.error("Unable to load older messages:", error);
+    } finally {
+      setLoadingOlderMessages(false);
+    }
+  };
 
   if (!gigId || !user) return null;
 
@@ -105,8 +160,6 @@ const ChatBox = ({ gigId, receiverId, token }) => {
     });
   };
 
-  console.log("Current User:", user);
-  console.log("First Message:", messages[0]);
   return (
     <Card
       padding="p-0"
@@ -150,7 +203,23 @@ const ChatBox = ({ gigId, receiverId, token }) => {
 
       {/* Messages */}
 
-      <div className="flex-1 overflow-y-auto bg-gradient-to-b from-slate-50 to-white p-6 dark:from-slate-950 dark:to-slate-900">
+      <div
+        ref={messageListRef}
+        className="flex-1 overflow-y-auto bg-gradient-to-b from-slate-50 to-white p-6 dark:from-slate-950 dark:to-slate-900"
+      >
+        {hasOlderMessages && (
+          <div className="mb-5 flex justify-center">
+            <Button
+              variant="secondary"
+              onClick={loadOlderMessages}
+              disabled={loadingOlderMessages}
+              fullWidth={false}
+            >
+              {loadingOlderMessages ? "Loading..." : "Load older messages"}
+            </Button>
+          </div>
+        )}
+
         {!Array.isArray(messages) || messages.length === 0 ? (
           <EmptyState
             icon={MessageCircle}

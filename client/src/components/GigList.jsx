@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Search,
   Sparkles,
@@ -43,70 +43,111 @@ const categories = [
     icon: "☁️",
   },
 ];
+const PAGE_SIZE = 12;
 
 export default function GigList() {
   const [gigs, setGigs] = useState([]);
-  const [filtered, setFiltered] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+  const [totalGigs, setTotalGigs] = useState(0);
   const [activeCategory, setActiveCategory] = useState("All");
+  const loadMoreController = useRef(null);
+  const searchRef = useRef(search);
+  searchRef.current = search;
 
   useEffect(() => {
-    setLoading(true);
-
-    fetch(`${API_URL}/gigs`)
-      .then((res) => res.json())
-      .then((data) => {
-        setGigs(data);
-        setFiltered(data);
-      })
-      .finally(() => setLoading(false));
-  }, []);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      fetch(`${API_URL}/gigs?search=${search}`)
-        .then((res) => res.json())
-        .then((data) => {
-          setGigs(data);
-
-          if (activeCategory === "All") {
-            setFiltered(data);
-          } else {
-            setFiltered(
-              data.filter((gig) =>
-                gig.title
-                  ?.toLowerCase()
-                  .includes(activeCategory.toLowerCase())
-              )
-            );
-          }
+    const controller = new AbortController();
+    loadMoreController.current?.abort();
+    loadMoreController.current = null;
+    setLoadingMore(false);
+    const timer = setTimeout(async () => {
+      try {
+        const params = new URLSearchParams({
+          page: "1",
+          limit: String(PAGE_SIZE),
+          search: search.trim(),
         });
-    }, 300);
+        const res = await fetch(`${API_URL}/gigs?${params}`, {
+          signal: controller.signal,
+        });
+        if (!res.ok) throw new Error("Unable to load projects");
 
-    return () => clearTimeout(timer);
+        const data = await res.json();
+        setGigs(data.gigs || []);
+        setTotalGigs(data.total || 0);
+        setPage(1);
+        setHasMore(data.page < data.pages);
+      } catch (error) {
+        if (error.name !== "AbortError") {
+          console.error("Unable to load projects:", error);
+          setGigs([]);
+          setHasMore(false);
+        }
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
+      }
+    }, 250);
+
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+      loadMoreController.current?.abort();
+    };
   }, [search]);
 
-  useEffect(() => {
-    if (activeCategory === "All") {
-      setFiltered(gigs);
-      return;
-    }
+  const filtered = useMemo(() => {
+    if (activeCategory === "All") return gigs;
 
-    setFiltered(
-      gigs.filter((gig) =>
-        gig.title
-          ?.toLowerCase()
-          .includes(activeCategory.toLowerCase())
-      )
+    return gigs.filter((gig) =>
+      gig.title?.toLowerCase().includes(activeCategory.toLowerCase()),
     );
   }, [activeCategory, gigs]);
+
+  const loadMore = async () => {
+    if (loadingMore || !hasMore) return;
+
+    const requestedSearch = search;
+    const controller = new AbortController();
+    loadMoreController.current = controller;
+    setLoadingMore(true);
+    try {
+      const nextPage = page + 1;
+      const params = new URLSearchParams({
+        page: String(nextPage),
+        limit: String(PAGE_SIZE),
+        search: search.trim(),
+      });
+      const res = await fetch(`${API_URL}/gigs?${params}`, {
+        signal: controller.signal,
+      });
+      if (!res.ok) throw new Error("Unable to load more projects");
+
+      const data = await res.json();
+      if (searchRef.current !== requestedSearch) return;
+      setGigs((current) => [...current, ...(data.gigs || [])]);
+      setTotalGigs(data.total || 0);
+      setPage(nextPage);
+      setHasMore(data.page < data.pages);
+    } catch (error) {
+      if (error.name !== "AbortError") {
+        console.error("Unable to load more projects:", error);
+      }
+    } finally {
+      if (loadMoreController.current === controller) {
+        loadMoreController.current = null;
+        setLoadingMore(false);
+      }
+    }
+  };
 
   const stats = useMemo(
     () => [
       {
         icon: Briefcase,
-        value: gigs.length,
+        value: totalGigs,
         label: "Live Projects",
         color: "from-blue-500 to-cyan-500",
       },
@@ -129,7 +170,7 @@ export default function GigList() {
         color: "from-orange-500 to-yellow-500",
       },
     ],
-    [gigs]
+    [totalGigs]
   );
 
   if (loading) {
@@ -355,33 +396,20 @@ export default function GigList() {
 
                 <motion.div
                   key="grid"
-                  layout
                   className="grid gap-8 md:grid-cols-2 xl:grid-cols-3"
                 >
 
-                  {filtered.map((gig, index) => (
+                  {filtered.map((gig) => (
 
                     <motion.div
                       key={gig._id}
-                      layout
-                      initial={{
-                        opacity: 0,
-                        y: 40,
-                        scale: 0.95,
-                      }}
-                      animate={{
-                        opacity: 1,
-                        y: 0,
-                        scale: 1,
-                      }}
+                      initial={{ opacity: 0, y: 16 }}
+                      animate={{ opacity: 1, y: 0 }}
                       exit={{
                         opacity: 0,
                         y: 20,
                       }}
-                      transition={{
-                        duration: 0.4,
-                        delay: index * 0.05,
-                      }}
+                      transition={{ duration: 0.2 }}
                     >
 
                       <GigCard gig={gig} />
@@ -395,6 +423,19 @@ export default function GigList() {
               )}
 
             </AnimatePresence>
+
+            {hasMore && (
+              <div className="mt-8 flex justify-center">
+                <button
+                  type="button"
+                  onClick={loadMore}
+                  disabled={loadingMore}
+                  className="rounded-2xl bg-gradient-to-r from-blue-600 to-violet-600 px-8 py-4 font-semibold text-white shadow-xl transition hover:scale-[1.02] disabled:cursor-wait disabled:opacity-70"
+                >
+                  {loadingMore ? "Loading projects..." : "Load more projects"}
+                </button>
+              </div>
+            )}
 
           </div>
 

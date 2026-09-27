@@ -224,25 +224,39 @@ exports.removeReview = async (req, res, next) => {
 // ===================== Dashboard stats =====================
 exports.getStats = async (req, res, next) => {
   try {
-    const [users, gigs, openGigs, bids, payments, reviews] = await Promise.all([
+    const [users, gigs, openGigs, bids, paymentStats, reviews] = await Promise.all([
       User.countDocuments({ role: { $ne: "admin" } }),
       Gig.countDocuments(),
       Gig.countDocuments({ status: "open" }),
       Bid.countDocuments(),
-      Payment.find(),
+      Payment.aggregate([
+        {
+          $group: {
+            _id: null,
+            count: { $sum: 1 },
+            revenue: {
+              $sum: {
+                $cond: [
+                  { $eq: ["$status", "completed"] },
+                  { $ifNull: ["$platformFee", 0] },
+                  0,
+                ],
+              },
+            },
+          },
+        },
+      ]),
       Review.countDocuments(),
     ]);
 
-    const revenue = payments
-      .filter((p) => p.status === "completed")
-      .reduce((sum, p) => sum + (p.platformFee || 0), 0);
+    const { count: paymentCount = 0, revenue = 0 } = paymentStats[0] || {};
 
     res.json({
       users,
       gigs,
       openGigs,
       bids,
-      payments: payments.length,
+      payments: paymentCount,
       revenue,
       reviews,
     });

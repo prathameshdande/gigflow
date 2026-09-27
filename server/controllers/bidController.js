@@ -75,6 +75,23 @@ exports.getBidsByGig = async (req, res, next) => {
   }
 };
 
+// Return only the freelancer's bid status for this gig instead of loading
+// their complete bid history on every gig detail visit.
+exports.getMyBidForGig = async (req, res, next) => {
+  try {
+    const bid = await Bid.findOne({
+      gigId: req.params.gigId,
+      freelancerId: req.userId,
+    })
+      .select("_id")
+      .lean();
+
+    res.json({ hasBid: Boolean(bid) });
+  } catch (err) {
+    next(err);
+  }
+};
+
 /**
  * Shared "accept a bid" logic used by both:
  *   PATCH /api/bids/hire/:bidId  (freelancer-centric flow)

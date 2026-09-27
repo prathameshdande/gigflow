@@ -31,4 +31,5 @@ const GigSchema = new mongoose.Schema(
 );
 
 GigSchema.index({ title: "text" });
+GigSchema.index({ createdAt: -1 });
 module.exports = mongoose.model("Gig", GigSchema);

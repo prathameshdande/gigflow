@@ -21,5 +21,7 @@ const BidSchema = new mongoose.Schema(
 );
 
 BidSchema.index({ gigId: 1, freelancerId: 1 }, { unique: true });
+BidSchema.index({ freelancerId: 1, createdAt: -1 });
+BidSchema.index({ createdAt: -1 });
 
 module.exports = mongoose.model("Bid", BidSchema);

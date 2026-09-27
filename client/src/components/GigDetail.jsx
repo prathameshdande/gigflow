@@ -59,6 +59,11 @@ const GigDetail = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
+  useEffect(() => {
+    if (gig?._id === id) fetchBids(gig);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, user, gig]);
+
   const fetchGig = async () => {
     try {
       const res = await fetch(`${API_URL}/gigs/${id}`, {
@@ -67,7 +72,6 @@ const GigDetail = () => {
 
       const data = await res.json();
       setGig(data);
-      await fetchBids(data);
     } catch (err) {
       console.error(err);
     } finally {
@@ -98,13 +102,13 @@ const GigDetail = () => {
           setBids(data);
         }
       } else if (user.role === "freelancer") {
-        const res = await fetch(`${API_URL}/bids/my`, {
+        const res = await fetch(`${API_URL}/bids/my/${id}`, {
           credentials: "include",
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         if (res.ok) {
           const data = await res.json();
-          setHasBid(data.some((b) => b.gigId?._id === id));
+          setHasBid(Boolean(data.hasBid));
         }
       } else {
         // e.g. an admin, or a client viewing someone else's gig - neither

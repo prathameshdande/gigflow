@@ -31,6 +31,7 @@ exports.createGig = async (req, res, next) => {
 exports.getGigs = async (req, res, next) => {
   try {
     const search = req.query.search || "";
+    const paginated = Boolean(req.query.page || req.query.limit);
     const page = Math.max(parseInt(req.query.page) || 1, 1);
     const limit = Math.min(parseInt(req.query.limit) || 20, 50);
 
@@ -38,22 +39,25 @@ exports.getGigs = async (req, res, next) => {
       title: { $regex: search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), $options: "i" },
     };
 
+    let gigsQuery = Gig.find(filter)
+      .select("userId title desc budget deadline status createdAt")
+      .populate("userId", "name avatar")
+      .sort({ createdAt: -1 });
+
+    if (paginated) {
+      gigsQuery = gigsQuery.skip((page - 1) * limit).limit(limit);
+    }
+
     const [gigs, total] = await Promise.all([
-      Gig.find(filter)
-        .populate("userId", "name avatar")
-        .sort({ createdAt: -1 })
-        .skip((page - 1) * limit)
-        .limit(limit),
-      Gig.countDocuments(filter),
+      gigsQuery,
+      paginated ? Gig.countDocuments(filter) : Promise.resolve(0),
     ]);
 
-    // If the client is asking without pagination params, return a plain
-    // array for backwards compatibility with existing UI code.
-    if (!req.query.page && !req.query.limit) {
-      const all = await Gig.find(filter)
-        .populate("userId", "name avatar")
-        .sort({ createdAt: -1 });
-      return res.json(all);
+    // Keep the legacy unpaginated response for older clients. The current
+    // marketplace requests pages so large gig collections do not download
+    // and render in a single response.
+    if (!paginated) {
+      return res.json(gigs);
     }
 
     res.json({ gigs, total, page, pages: Math.ceil(total / limit) });

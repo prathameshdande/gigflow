@@ -5,6 +5,7 @@ const validate = require("../middleware/validate");
 const {
   createBid,
   getBidsByGig,
+  getMyBidForGig,
   hireFreelancer,
   getMyBids,
   withdrawBid,
@@ -25,6 +26,14 @@ router.post(
   createBid,
 );
 router.get("/my", verifyToken, restrictTo("freelancer"), getMyBids);
+router.get(
+  "/my/:gigId",
+  verifyToken,
+  restrictTo("freelancer"),
+  mongoIdParam("gigId"),
+  validate,
+  getMyBidForGig,
+);
 router.get("/:gigId", verifyToken, mongoIdParam("gigId"), validate, getBidsByGig);
 router.patch(
   "/hire/:bidId",

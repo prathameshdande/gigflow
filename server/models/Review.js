@@ -21,5 +21,7 @@ const ReviewSchema = new mongoose.Schema(
 
 // One review per reviewer per gig
 ReviewSchema.index({ gigId: 1, reviewer: 1 }, { unique: true });
+ReviewSchema.index({ targetUser: 1, createdAt: -1 });
+ReviewSchema.index({ createdAt: -1 });
 
 module.exports = mongoose.model("Review", ReviewSchema);

@@ -34,4 +34,8 @@ const PaymentSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
+PaymentSchema.index({ payer: 1, createdAt: -1 });
+PaymentSchema.index({ payee: 1, createdAt: -1 });
+PaymentSchema.index({ createdAt: -1 });
+
 module.exports = mongoose.model("Payment", PaymentSchema);

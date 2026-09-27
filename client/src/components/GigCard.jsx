@@ -51,7 +51,6 @@ const GigCard = ({ gig }) => {
 
   return (
     <motion.article
-      layout
       whileHover={{
         y: -10,
         scale: 1.02,

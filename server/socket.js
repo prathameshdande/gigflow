@@ -82,8 +82,7 @@ function initSocket(server, allowedOrigins) {
         });
 
         const populatedMessage = await Message.findById(message._id)
-          .populate("sender", "name avatar email")
-          .populate("receiver", "name avatar email");
+          .populate("sender", "name");
 
         io.to(data.gigId).emit("newMessage", populatedMessage);
         console.log(`Message sent in room ${data.gigId}`);
