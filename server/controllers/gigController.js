@@ -42,7 +42,8 @@ exports.getGigs = async (req, res, next) => {
     let gigsQuery = Gig.find(filter)
       .select("userId title desc budget deadline status createdAt")
       .populate("userId", "name avatar")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
 
     if (paginated) {
       gigsQuery = gigsQuery.skip((page - 1) * limit).limit(limit);

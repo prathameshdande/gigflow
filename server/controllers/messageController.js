@@ -94,7 +94,8 @@ exports.getMessages = async (req, res, next) => {
     const results = await Message.find(filter)
       .populate("sender", "name")
       .sort({ createdAt: -1, _id: -1 })
-      .limit(limit + 1);
+      .limit(limit + 1)
+      .lean();
 
     const hasMore = results.length > limit;
     const messages = results.slice(0, limit).reverse();

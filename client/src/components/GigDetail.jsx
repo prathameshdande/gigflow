@@ -62,7 +62,7 @@ const GigDetail = () => {
   useEffect(() => {
     if (gig?._id === id) fetchBids(gig);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, user, gig]);
+  }, [id, user, gig?._id]);
 
   const fetchGig = async () => {
     try {

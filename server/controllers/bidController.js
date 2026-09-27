@@ -66,8 +66,8 @@ exports.getBidsByGig = async (req, res, next) => {
 
     const bids = await Bid.find({ gigId: req.params.gigId }).populate(
       "freelancerId",
-      "name email avatar",
-    );
+      "name",
+    ).lean();
 
     res.json(bids);
   } catch (err) {
