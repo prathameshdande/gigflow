@@ -1,11 +1,5 @@
 import {
-  Briefcase,
-  LogOut,
-  PlusCircle,
-  List,
   User,
-  CreditCard,
-  Shield,
   Menu,
   X,
   Sun,
@@ -174,28 +168,16 @@ const Navbar = () => {
       className="sticky top-4 z-50 mx-auto w-[96%] max-w-7xl">
       <div className="rounded-3xl border border-white/20 bg-white/90 dark:bg-slate-950/85 backdrop-blur-sm shadow-2xl">
         <div className="flex h-20 items-center justify-between px-7">
-          <Link to="/" className="flex items-center gap-4">
-            <motion.div
-              whileHover={{
-                rotate: 12,
-                scale: 1.1,
-              }}
-              whileTap={{
-                scale: 0.9,
-              }}
-              className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 via-violet-600 to-cyan-500 text-white shadow-xl">
-              <Briefcase size={26} />
-            </motion.div>
-
-            <div>
-              <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
-                GigFlow
-              </h1>
-
-              <p className="text-xs tracking-widest uppercase text-blue-600 dark:text-cyan-400">
-                Freelance Platform
-              </p>
-            </div>
+          <Link to="/" aria-label="GigFlow home" className="flex items-center">
+            <img
+              src="/gigflow-logo.png"
+              alt="GigFlow"
+              width="480"
+              height="160"
+              fetchPriority="high"
+              decoding="async"
+              className="h-12 w-auto max-w-[160px] rounded-xl bg-white p-1 object-contain"
+            />
           </Link>
 
           {!loading && user && (
