@@ -8,7 +8,6 @@ import {
   ArrowRight,
   X,
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 import { API_URL } from "../api/config";
 import GigCard from "./GigCard";
 import GigSkeleton from "./GigSkeleton";
@@ -44,25 +43,66 @@ const categories = [
   },
 ];
 const PAGE_SIZE = 9;
+const GIG_CACHE_KEY = "gigflow:public-gigs:first-page";
+const GIG_CACHE_MAX_AGE = 5 * 60 * 1000;
+
+const readGigCache = () => {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const cached = JSON.parse(window.sessionStorage.getItem(GIG_CACHE_KEY));
+    if (!cached || Date.now() - cached.savedAt > GIG_CACHE_MAX_AGE) return null;
+    return cached;
+  } catch {
+    return null;
+  }
+};
+
+const saveGigCache = (data) => {
+  if (typeof window === "undefined") return;
+
+  try {
+    window.sessionStorage.setItem(
+      GIG_CACHE_KEY,
+      JSON.stringify({ ...data, savedAt: Date.now() }),
+    );
+  } catch {
+    // The list still works when browser storage is disabled or full.
+  }
+};
 
 export default function GigList() {
-  const [gigs, setGigs] = useState([]);
+  const [initialCache] = useState(readGigCache);
+  const [gigs, setGigs] = useState(() => initialCache?.gigs || []);
   const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => !initialCache);
   const [loadingMore, setLoadingMore] = useState(false);
   const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(false);
-  const [totalGigs, setTotalGigs] = useState(0);
+  const [hasMore, setHasMore] = useState(() => Boolean(initialCache?.hasMore));
+  const [totalGigs, setTotalGigs] = useState(() => initialCache?.total || 0);
   const [activeCategory, setActiveCategory] = useState("All");
   const loadMoreController = useRef(null);
   const searchRef = useRef(search);
+  const gigsRef = useRef(gigs);
   searchRef.current = search;
+  gigsRef.current = gigs;
 
   useEffect(() => {
     const controller = new AbortController();
+    const cached = search.trim() ? null : readGigCache();
     loadMoreController.current?.abort();
     loadMoreController.current = null;
     setLoadingMore(false);
+    if (cached) {
+      setGigs(cached.gigs || []);
+      setTotalGigs(cached.total || 0);
+      setHasMore(Boolean(cached.hasMore));
+      setPage(1);
+      setLoading(false);
+    } else if (gigsRef.current.length === 0) {
+      setLoading(true);
+    }
+
     const timer = setTimeout(async () => {
       try {
         const params = new URLSearchParams({
@@ -80,11 +120,21 @@ export default function GigList() {
         setTotalGigs(data.total || 0);
         setPage(1);
         setHasMore(data.page < data.pages);
+        if (!search.trim()) {
+          saveGigCache({
+            gigs: data.gigs || [],
+            total: data.total || 0,
+            hasMore: data.page < data.pages,
+          });
+        }
       } catch (error) {
         if (error.name !== "AbortError") {
           console.error("Unable to load projects:", error);
-          setGigs([]);
-          setHasMore(false);
+          if (!cached) {
+            setGigs([]);
+            setTotalGigs(0);
+            setHasMore(false);
+          }
         }
       } finally {
         if (!controller.signal.aborted) setLoading(false);
@@ -177,23 +227,19 @@ export default function GigList() {
     <div className="mx-auto max-w-7xl px-5 py-10">
 
       <section
-        className="relative overflow-hidden rounded-[36px] border border-white/10 bg-white/70 p-10 shadow-2xl backdrop-blur-3xl dark:bg-white/5"
+        className="relative overflow-hidden rounded-[36px] border border-white/10 bg-white/80 p-10 shadow-2xl dark:bg-slate-950/60"
       >
 
-        <div className="absolute -left-40 -top-40 h-96 w-96 rounded-full bg-blue-500/20 blur-[120px]" />
+        <div className="absolute -left-40 -top-40 h-96 w-96 bg-[radial-gradient(circle,rgba(59,130,246,0.16)_0%,transparent_70%)]" />
 
-        <div className="absolute -right-40 bottom-0 h-96 w-96 rounded-full bg-violet-500/20 blur-[120px]" />
+        <div className="absolute -right-40 bottom-0 h-96 w-96 bg-[radial-gradient(circle,rgba(139,92,246,0.16)_0%,transparent_70%)]" />
 
         <div className="relative z-10">
 
-          <motion.div
-            initial={{ opacity:0,y:15 }}
-            animate={{ opacity:1,y:0 }}
-            className="inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/10 px-5 py-2 text-sm font-semibold text-blue-600 dark:text-cyan-400"
-          >
+          <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/10 px-5 py-2 text-sm font-semibold text-blue-600 dark:text-cyan-400">
             <Sparkles size={16}/>
             Premium Freelance Marketplace
-          </motion.div>
+          </div>
 
           <h1 className="mt-8 max-w-4xl text-5xl font-black leading-tight text-slate-900 dark:text-white lg:text-6xl">
             Find Your Next
@@ -225,23 +271,14 @@ export default function GigList() {
                 className="w-full rounded-2xl border border-white/20 bg-white/80 py-4 pl-14 pr-14 text-slate-800 shadow-lg outline-none transition focus:border-blue-500 dark:bg-white/10 dark:text-white"
               />
 
-              <AnimatePresence>
-
                 {search && (
-
-                  <motion.button
-                    initial={{ scale:0 }}
-                    animate={{ scale:1 }}
-                    exit={{ scale:0 }}
+                  <button
                     onClick={()=>setSearch("")}
-                    className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500"
+                    className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 transition-colors hover:text-red-500"
                   >
                     <X size={18}/>
-                  </motion.button>
-
+                  </button>
                 )}
-
-              </AnimatePresence>
 
             </div>
 
@@ -260,13 +297,9 @@ export default function GigList() {
 
               return(
 
-                <motion.div
-                  whileHover={{
-                    y:-8,
-                    scale:1.03
-                  }}
+                <div
                   key={item.label}
-                  className="rounded-3xl border border-white/10 bg-white/60 p-6 backdrop-blur-xl dark:bg-white/5"
+                  className="rounded-3xl border border-white/10 bg-white/80 p-6 transition-transform hover:-translate-y-1 hover:scale-[1.02] dark:bg-white/5"
                 >
 
                   <div className={`mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${item.color} text-white shadow-lg`}>
@@ -283,7 +316,7 @@ export default function GigList() {
                     {item.label}
                   </p>
 
-                </motion.div>
+                </div>
 
               )
 
@@ -297,12 +330,10 @@ export default function GigList() {
               <div className="flex flex-wrap gap-3">
 
                 {categories.map((category) => (
-                  <motion.button
-                    whileTap={{ scale: 0.95 }}
-                    whileHover={{ y: -2 }}
+                  <button
                     key={category.label}
                     onClick={() => setActiveCategory(category.label)}
-                    className={`flex items-center gap-2 rounded-full px-5 py-3 text-sm font-semibold transition-all duration-300 ${
+                    className={`flex items-center gap-2 rounded-full px-5 py-3 text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5 active:scale-95 ${
                       activeCategory === category.label
                         ? "bg-gradient-to-r from-blue-600 to-violet-600 text-white shadow-lg"
                         : "border border-white/20 bg-white/70 text-slate-700 hover:bg-blue-100 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10"
@@ -310,14 +341,14 @@ export default function GigList() {
                   >
                     <span>{category.icon}</span>
                     {category.label}
-                  </motion.button>
+                  </button>
                 ))}
 
               </div>
 
               <div className="flex items-center gap-3">
 
-                <div className="rounded-2xl border border-white/20 bg-white/70 px-5 py-3 backdrop-blur-xl dark:bg-white/5">
+                <div className="rounded-2xl border border-white/20 bg-white/80 px-5 py-3 dark:bg-white/5">
 
                   <span className="text-sm text-slate-500 dark:text-slate-400">
                     Showing
@@ -337,8 +368,6 @@ export default function GigList() {
 
             </div>
 
-            <AnimatePresence mode="wait">
-
               {loading ? (
                 <div
                   key="loading"
@@ -350,12 +379,9 @@ export default function GigList() {
                 </div>
               ) : filtered.length === 0 ? (
 
-                <motion.div
+                <div
                   key="empty"
-                  initial={{ opacity: 0, y: 25 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }}
-                  className="rounded-[36px] border border-dashed border-slate-300 bg-white/60 p-16 text-center backdrop-blur-xl dark:border-white/10 dark:bg-white/5"
+                  className="rounded-[36px] border border-dashed border-slate-300 bg-white/80 p-16 text-center dark:border-white/10 dark:bg-white/5"
                 >
 
                   <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-blue-500/10">
@@ -386,39 +412,24 @@ export default function GigList() {
                     Reset Filters
                   </button>
 
-                </motion.div>
+                </div>
 
               ) : (
 
-                <motion.div
+                <div
                   key="grid"
                   className="grid gap-8 md:grid-cols-2 xl:grid-cols-3"
                 >
 
                   {filtered.map((gig) => (
 
-                    <motion.div
-                      key={gig._id}
-                      initial={{ opacity: 0, y: 16 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{
-                        opacity: 0,
-                        y: 20,
-                      }}
-                      transition={{ duration: 0.2 }}
-                    >
-
-                      <GigCard gig={gig} />
-
-                    </motion.div>
+                    <GigCard key={gig._id} gig={gig} />
 
                   ))}
 
-                </motion.div>
+                </div>
 
               )}
-
-            </AnimatePresence>
 
             {hasMore && (
               <div className="mt-8 flex justify-center">
@@ -438,16 +449,12 @@ export default function GigList() {
         </div>
 
       </section>
-            <motion.section
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        viewport={{ once: true }}
+            <section
         className="mt-20 overflow-hidden rounded-[36px] border border-white/10 bg-gradient-to-br from-blue-600 via-violet-600 to-cyan-600 p-10 text-white shadow-2xl"
       >
         <div className="flex flex-col items-center justify-between gap-8 lg:flex-row">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 backdrop-blur-xl">
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2">
               <Sparkles size={16} />
               Ready to Start?
             </div>
@@ -470,12 +477,12 @@ export default function GigList() {
               Browse Projects
             </button>
 
-            <button className="rounded-2xl border border-white/20 bg-white/10 px-8 py-4 font-bold backdrop-blur-xl transition hover:bg-white/20">
+            <button className="rounded-2xl border border-white/20 bg-white/10 px-8 py-4 font-bold transition hover:bg-white/20">
               Post a Project
             </button>
           </div>
         </div>
-      </motion.section>
+        </section>
 
       <footer className="mt-20 flex flex-col items-center justify-between gap-4 border-t border-white/10 py-8 text-sm text-slate-500 dark:text-slate-400 lg:flex-row">
         <p>

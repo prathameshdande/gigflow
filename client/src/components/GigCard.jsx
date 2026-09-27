@@ -1,11 +1,10 @@
-import { motion } from "framer-motion";
+import { memo } from "react";
 import {
   IndianRupee,
   Clock3,
   ArrowRight,
   Sparkles,
   BadgeCheck,
-  Briefcase,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -50,18 +49,9 @@ const GigCard = ({ gig }) => {
           .slice(0, 4) || [];
 
   return (
-    <motion.article
-      whileHover={{
-        y: -10,
-        scale: 1.02,
-      }}
-      transition={{
-        type: "spring",
-        stiffness: 220,
-        damping: 18,
-      }}
+    <article
       onClick={() => navigate(`/gigs/${gig._id}`)}
-      className="group relative cursor-pointer overflow-hidden rounded-[30px] border border-slate-200/60 bg-white shadow-lg transition-all duration-500 hover:border-blue-400/40 hover:shadow-2xl dark:border-white/10 dark:bg-white/5">
+      className="group relative cursor-pointer overflow-hidden rounded-[30px] border border-slate-200/60 bg-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:scale-[1.01] hover:border-blue-400/40 hover:shadow-2xl dark:border-white/10 dark:bg-white/5">
       <div className="absolute inset-0 opacity-0 transition duration-500 group-hover:opacity-100">
         <div className="absolute -right-20 -top-20 h-60 w-60 rounded-full bg-blue-500/20 blur-3xl" />
         <div className="absolute -bottom-20 -left-20 h-60 w-60 rounded-full bg-violet-500/20 blur-3xl" />
@@ -70,8 +60,17 @@ const GigCard = ({ gig }) => {
       <div className="relative z-10 p-7">
         <div className="mb-6 flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 via-violet-600 to-cyan-500 text-white shadow-lg">
-              <Briefcase size={24} />
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-blue-500/10 bg-blue-500/10 shadow-lg dark:border-white/10 dark:bg-white/5">
+              <img
+                src="/favicon.png"
+                alt=""
+                aria-hidden="true"
+                width="64"
+                height="61"
+                loading="lazy"
+                decoding="async"
+                className="h-10 w-10 object-contain"
+              />
             </div>
 
             <div>
@@ -147,15 +146,13 @@ const GigCard = ({ gig }) => {
           </div>
         </div>
 
-        <motion.button
-          whileHover={{ x: 4 }}
-          className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 via-violet-600 to-cyan-500 px-6 py-4 font-semibold text-white shadow-xl transition-all duration-300 hover:shadow-blue-500/30">
+        <button className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 via-violet-600 to-cyan-500 px-6 py-4 font-semibold text-white shadow-xl transition-all duration-300 hover:shadow-blue-500/30">
           View Details
           <ArrowRight size={18} />
-        </motion.button>
+        </button>
       </div>
-    </motion.article>
+    </article>
   );
 };
 
-export default GigCard;
+export default memo(GigCard);

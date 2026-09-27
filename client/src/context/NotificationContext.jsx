@@ -6,7 +6,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { io } from "socket.io-client";
 import {
   getNotifications,
   markAsRead,
@@ -24,7 +23,7 @@ export const useNotifications = () => useContext(NotificationContext);
 const SOCKET_URL = API_URL.replace(/\/api\/?$/, "");
 
 export const NotificationProvider = ({ children }) => {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const [notifications, setNotifications] = useState([]);
   const socketRef = useRef(null);
 
@@ -64,42 +63,54 @@ export const NotificationProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    if (!token) {
+    if (!user) {
       setNotifications([]);
       return;
     }
 
     loadNotifications();
+    if (!token) return;
 
-    const s = io(SOCKET_URL, {
-      auth: { token },
-      transports: ["websocket"],
-    });
+    let active = true;
+    let socket;
 
-    socketRef.current = s;
+    import("socket.io-client").then(({ io }) => {
+      if (!active) return;
 
-    s.on("newNotification", (notification) => {
-      setNotifications((prev) => {
-        if (prev.some((n) => n._id === notification._id)) {
-          return prev;
-        }
-        return [notification, ...prev];
+      socket = io(SOCKET_URL, {
+        auth: { token },
+        transports: ["websocket"],
       });
+      socketRef.current = socket;
 
-      toast.custom(() => (
-        <div className="w-80 rounded-xl border border-white/10 bg-zinc-900 p-4 shadow-xl">
-          <div className="font-semibold">{notification.title}</div>
-          <div className="mt-1 text-sm text-zinc-400">{notification.message}</div>
-        </div>
-      ));
+      socket.on("newNotification", (notification) => {
+        setNotifications((prev) => {
+          if (prev.some((n) => n._id === notification._id)) {
+            return prev;
+          }
+          return [notification, ...prev];
+        });
+
+        toast.custom(() => (
+          <div className="w-80 rounded-xl border border-white/10 bg-zinc-900 p-4 shadow-xl">
+            <div className="font-semibold">{notification.title}</div>
+            <div className="mt-1 text-sm text-zinc-400">{notification.message}</div>
+          </div>
+        ));
+      });
+    }).catch((error) => {
+      console.error("Unable to connect to notifications:", error);
     });
 
     return () => {
-      s.off("newNotification");
-      s.disconnect();
-      socketRef.current = null;
+      active = false;
+      if (socket) {
+        socket.off("newNotification");
+        socket.disconnect();
+      }
+      if (socketRef.current === socket) socketRef.current = null;
     };
-  }, [token, loadNotifications]);
+  }, [token, user?._id, loadNotifications]);
 
   return (
     <NotificationContext.Provider

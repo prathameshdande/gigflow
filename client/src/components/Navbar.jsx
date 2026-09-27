@@ -5,7 +5,6 @@ import {
   Sun,
   Moon,
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -161,11 +160,7 @@ const Navbar = () => {
   };
 
   return (
-    <motion.nav
-      initial={{ y: -80 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.6 }}
-      className="sticky top-4 z-50 mx-auto w-[96%] max-w-7xl">
+    <nav className="sticky top-4 z-50 mx-auto w-[96%] max-w-7xl">
       <div className="rounded-3xl border border-white/20 bg-white/90 dark:bg-slate-950/85 backdrop-blur-sm shadow-2xl">
         <div className="flex h-20 items-center justify-between px-7">
           <Link to="/" aria-label="GigFlow home" className="flex items-center">
@@ -176,7 +171,7 @@ const Navbar = () => {
               height="160"
               fetchPriority="high"
               decoding="async"
-              className="h-12 w-auto max-w-[160px] rounded-xl bg-white p-1 object-contain"
+              className="h-12 w-auto max-w-[160px] object-contain dark:brightness-0 dark:invert"
             />
           </Link>
 
@@ -217,33 +212,21 @@ const Navbar = () => {
           </div>
         </div>
 
-        <AnimatePresence>
-          {open && user && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{
-                opacity: 1,
-                height: "auto",
-              }}
-              exit={{
-                opacity: 0,
-                height: 0,
-              }}
-              className="border-t border-white/10 lg:hidden">
-              <div className="flex flex-col gap-3 p-5">
-                <NavItems user={user} location={location} closeMenu={closeMenu} />
+        {open && user && (
+          <div className="border-t border-white/10 lg:hidden">
+            <div className="flex flex-col gap-3 p-5">
+              <NavItems user={user} location={location} closeMenu={closeMenu} />
 
-                <button
-                  onClick={logoutUser}
-                  className="rounded-2xl bg-red-500 py-3 text-white">
-                  Logout
-                </button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+              <button
+                onClick={logoutUser}
+                className="rounded-2xl bg-red-500 py-3 text-white">
+                Logout
+              </button>
+            </div>
+          </div>
+        )}
       </div>
-    </motion.nav>
+    </nav>
   );
 };
 
