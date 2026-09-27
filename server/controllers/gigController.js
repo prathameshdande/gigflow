@@ -30,14 +30,19 @@ exports.createGig = async (req, res, next) => {
 // ===========================
 exports.getGigs = async (req, res, next) => {
   try {
-    const search = req.query.search || "";
+    const search = (req.query.search || "").trim();
     const paginated = Boolean(req.query.page || req.query.limit);
     const page = Math.max(parseInt(req.query.page) || 1, 1);
     const limit = Math.min(parseInt(req.query.limit) || 20, 50);
 
-    const filter = {
-      title: { $regex: search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), $options: "i" },
-    };
+    const filter = search
+      ? {
+          title: {
+            $regex: search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+            $options: "i",
+          },
+        }
+      : {};
 
     let gigsQuery = Gig.find(filter)
       .select("userId title desc budget deadline status createdAt")
@@ -51,7 +56,11 @@ exports.getGigs = async (req, res, next) => {
 
     const [gigs, total] = await Promise.all([
       gigsQuery,
-      paginated ? Gig.countDocuments(filter) : Promise.resolve(0),
+      paginated
+        ? search
+          ? Gig.countDocuments(filter)
+          : Gig.estimatedDocumentCount()
+        : Promise.resolve(0),
     ]);
 
     // Keep the legacy unpaginated response for older clients. The current

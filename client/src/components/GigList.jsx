@@ -43,7 +43,7 @@ const categories = [
     icon: "☁️",
   },
 ];
-const PAGE_SIZE = 12;
+const PAGE_SIZE = 9;
 
 export default function GigList() {
   const [gigs, setGigs] = useState([]);
@@ -89,7 +89,7 @@ export default function GigList() {
       } finally {
         if (!controller.signal.aborted) setLoading(false);
       }
-    }, 250);
+    }, search.trim() ? 250 : 0);
 
     return () => {
       clearTimeout(timer);
@@ -147,7 +147,7 @@ export default function GigList() {
     () => [
       {
         icon: Briefcase,
-        value: totalGigs,
+        value: loading ? "…" : totalGigs,
         label: "Live Projects",
         color: "from-blue-500 to-cyan-500",
       },
@@ -170,26 +170,13 @@ export default function GigList() {
         color: "from-orange-500 to-yellow-500",
       },
     ],
-    [totalGigs]
+    [loading, totalGigs]
   );
-
-  if (loading) {
-    return (
-      <div className="mx-auto grid max-w-7xl gap-6 px-6 py-10 md:grid-cols-2 xl:grid-cols-3">
-        {Array.from({ length: 9 }).map((_, i) => (
-          <GigSkeleton key={i} />
-        ))}
-      </div>
-    );
-  }
 
   return (
     <div className="mx-auto max-w-7xl px-5 py-10">
 
-      <motion.section
-        initial={{ opacity: 0, y: 35 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: .6 }}
+      <section
         className="relative overflow-hidden rounded-[36px] border border-white/10 bg-white/70 p-10 shadow-2xl backdrop-blur-3xl dark:bg-white/5"
       >
 
@@ -337,7 +324,7 @@ export default function GigList() {
                   </span>
 
                   <span className="ml-2 font-bold text-slate-900 dark:text-white">
-                    {filtered.length}
+                    {loading ? "…" : filtered.length}
                   </span>
 
                   <span className="ml-2 text-sm text-slate-500 dark:text-slate-400">
@@ -352,7 +339,16 @@ export default function GigList() {
 
             <AnimatePresence mode="wait">
 
-              {filtered.length === 0 ? (
+              {loading ? (
+                <div
+                  key="loading"
+                  className="grid gap-6 md:grid-cols-2 xl:grid-cols-3"
+                >
+                  {Array.from({ length: PAGE_SIZE }).map((_, index) => (
+                    <GigSkeleton key={index} />
+                  ))}
+                </div>
+              ) : filtered.length === 0 ? (
 
                 <motion.div
                   key="empty"
@@ -441,7 +437,7 @@ export default function GigList() {
 
         </div>
 
-      </motion.section>
+      </section>
             <motion.section
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
