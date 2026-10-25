@@ -13,7 +13,10 @@ const rateLimit = require("express-rate-limit");
 const mongoSanitize = require("express-mongo-sanitize");
 const hpp = require("hpp");
 
+<<<<<<< HEAD
 dotenv.config({ path: path.join(__dirname, ".env") });
+=======
+>>>>>>> origin/main
 dotenv.config();
 require("express-async-errors"); // auto-forwards async controller throws to the error handler
 
@@ -53,10 +56,13 @@ const allowedOrigins = [
   "http://localhost:5173",
 ];
 
+<<<<<<< HEAD
 const isDevOrigin = (origin) => {
   return origin.startsWith("http://localhost:") || origin.startsWith("http://127.0.0.1:");
 };
 
+=======
+>>>>>>> origin/main
 app.set("trust proxy", 1);
 
 app.use(helmet());
@@ -64,11 +70,15 @@ app.use(compression());
 app.use(
   cors({
     origin: function (origin, callback) {
+<<<<<<< HEAD
       if (
         !origin ||
         allowedOrigins.includes(origin) ||
         (process.env.NODE_ENV !== "production" && isDevOrigin(origin))
       ) {
+=======
+      if (!origin || allowedOrigins.includes(origin)) {
+>>>>>>> origin/main
         return callback(null, true);
       }
       return callback(new Error("Not allowed by CORS"));
@@ -103,6 +113,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/api/health", (req, res) => {
+<<<<<<< HEAD
   const stateMap = {
     0: "disconnected",
     1: "connected",
@@ -114,6 +125,11 @@ app.get("/api/health", (req, res) => {
     status: isConnected ? "ok" : "warming_up",
     db: stateMap[mongoose.connection.readyState] || "unknown",
     readyState: mongoose.connection.readyState,
+=======
+  res.status(200).json({
+    status: "ok",
+    db: mongoose.connection.readyState === 1 ? "connected" : "disconnected",
+>>>>>>> origin/main
   });
 });
 
@@ -192,6 +208,7 @@ mongoose.connection.on("reconnected", () => {
   console.log("MongoDB reconnected");
 });
 
+<<<<<<< HEAD
 // Enable query buffering with extended timeout for smooth cold-start handling
 mongoose.set("bufferCommands", true);
 mongoose.set("bufferTimeoutMS", 30000);
@@ -225,6 +242,24 @@ const connectDB = async (retries = 6, delay = 1500) => {
   }
   console.warn("MongoDB failed to connect after multiple retries. Server will keep trying in background...");
   setTimeout(() => connectDB(retries, delay), 5000);
+=======
+const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log(
+      `MongoDB Connected -> db: "${mongoose.connection.name}" host: ${mongoose.connection.host}`,
+    );
+
+    const PORT = process.env.PORT || 8800;
+    server.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error("MongoDB Connection Failed");
+    console.error(error.message);
+    process.exit(1);
+  }
+>>>>>>> origin/main
 };
 
 connectDB();

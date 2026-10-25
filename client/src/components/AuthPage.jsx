@@ -112,8 +112,12 @@ const AuthPage = () => {
           initial={{ opacity: 0, x: -30 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6 }}
+<<<<<<< HEAD
           className="hidden lg:flex flex-col justify-center space-y-8"
         >
+=======
+          className="hidden lg:flex flex-col justify-center space-y-8">
+>>>>>>> origin/main
           <div>
             <h1 className="text-5xl font-bold text-white mb-2">GigFlow</h1>
             <p className="text-slate-400 text-lg">
@@ -132,8 +136,12 @@ const AuthPage = () => {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.1 + 0.3 }}
+<<<<<<< HEAD
                 className="flex items-center gap-3 text-slate-300"
               >
+=======
+                className="flex items-center gap-3 text-slate-300">
+>>>>>>> origin/main
                 <div className="p-2 rounded-xl bg-emerald-500/20">
                   <item.icon size={20} className="text-emerald-400" />
                 </div>
@@ -152,8 +160,12 @@ const AuthPage = () => {
                 key={i}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
+<<<<<<< HEAD
                 transition={{ delay: i * 0.1 + 0.5 }}
               >
+=======
+                transition={{ delay: i * 0.1 + 0.5 }}>
+>>>>>>> origin/main
                 <h2 className="text-3xl font-black text-white">{stat.value}</h2>
                 <p className="text-slate-400 text-sm">{stat.label}</p>
               </motion.div>
@@ -166,8 +178,12 @@ const AuthPage = () => {
           initial={{ opacity: 0, y: 30, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.5 }}
+<<<<<<< HEAD
           className="bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 p-8 shadow-2xl"
         >
+=======
+          className="bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 p-8 shadow-2xl">
+>>>>>>> origin/main
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <div>
@@ -186,8 +202,12 @@ const AuthPage = () => {
                   isLogin
                     ? "bg-emerald-500/20 text-emerald-400"
                     : "text-slate-400 hover:text-white"
+<<<<<<< HEAD
                 }`}
               >
+=======
+                }`}>
+>>>>>>> origin/main
                 Login
               </button>
               <button
@@ -197,8 +217,12 @@ const AuthPage = () => {
                   !isLogin
                     ? "bg-emerald-500/20 text-emerald-400"
                     : "text-slate-400 hover:text-white"
+<<<<<<< HEAD
                 }`}
               >
+=======
+                }`}>
+>>>>>>> origin/main
                 Register
               </button>
             </div>
@@ -220,7 +244,11 @@ const AuthPage = () => {
                     type="text"
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
+<<<<<<< HEAD
                     placeholder="Enter your full name"
+=======
+                    placeholder="John Doe"
+>>>>>>> origin/main
                     className="w-full rounded-2xl border border-white/10 bg-white/5 py-3 pl-12 pr-4 text-white placeholder:text-slate-500 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition"
                     required={!isLogin}
                   />
@@ -242,7 +270,11 @@ const AuthPage = () => {
                   type="email"
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
+<<<<<<< HEAD
                   placeholder="Enter your email address"
+=======
+                  placeholder="you@example.com"
+>>>>>>> origin/main
                   className="w-full rounded-2xl border border-white/10 bg-white/5 py-3 pl-12 pr-4 text-white placeholder:text-slate-500 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition"
                   required
                 />
@@ -265,15 +297,23 @@ const AuthPage = () => {
                   onChange={(e) =>
                     setForm({ ...form, password: e.target.value })
                   }
+<<<<<<< HEAD
                   placeholder="Enter your password"
+=======
+                  placeholder="••••••••"
+>>>>>>> origin/main
                   className="w-full rounded-2xl border border-white/10 bg-white/5 py-3 pl-12 pr-12 text-white placeholder:text-slate-500 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
+<<<<<<< HEAD
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition"
                 >
+=======
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition">
+>>>>>>> origin/main
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
@@ -284,8 +324,12 @@ const AuthPage = () => {
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
+<<<<<<< HEAD
                 className="space-y-3 rounded-2xl bg-white/5 p-4"
               >
+=======
+                className="space-y-3 rounded-2xl bg-white/5 p-4">
+>>>>>>> origin/main
                 <div className="flex justify-between">
                   <span className="text-sm text-slate-300">
                     Password Strength
@@ -297,8 +341,12 @@ const AuthPage = () => {
                         : form.password.length > 6
                           ? "text-yellow-400"
                           : "text-red-400"
+<<<<<<< HEAD
                     }`}
                   >
+=======
+                    }`}>
+>>>>>>> origin/main
                     {form.password.length > 10
                       ? "Strong"
                       : form.password.length > 6
@@ -344,8 +392,12 @@ const AuthPage = () => {
                       <span
                         className={
                           item.test ? "text-green-400" : "text-red-400"
+<<<<<<< HEAD
                         }
                       >
+=======
+                        }>
+>>>>>>> origin/main
                         {item.label}
                       </span>
                     </div>
@@ -376,8 +428,12 @@ const AuthPage = () => {
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+<<<<<<< HEAD
                     className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition"
                   >
+=======
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition">
+>>>>>>> origin/main
                     {showConfirmPassword ? (
                       <EyeOff size={18} />
                     ) : (
@@ -389,8 +445,12 @@ const AuthPage = () => {
                   <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
+<<<<<<< HEAD
                     className="mt-2 flex items-center gap-2 text-sm"
                   >
+=======
+                    className="mt-2 flex items-center gap-2 text-sm">
+>>>>>>> origin/main
                     {form.password === confirmPassword ? (
                       <>
                         <CheckCircle2 size={16} className="text-green-400" />
@@ -425,8 +485,12 @@ const AuthPage = () => {
                       form.role === "client"
                         ? "border-emerald-500 bg-emerald-500/20"
                         : "border-white/10 bg-white/5 hover:bg-white/10"
+<<<<<<< HEAD
                     }`}
                   >
+=======
+                    }`}>
+>>>>>>> origin/main
                     <User
                       size={24}
                       className={`mx-auto mb-3 ${
@@ -450,8 +514,12 @@ const AuthPage = () => {
                       form.role === "freelancer"
                         ? "border-cyan-500 bg-cyan-500/20"
                         : "border-white/10 bg-white/5 hover:bg-white/10"
+<<<<<<< HEAD
                     }`}
                   >
+=======
+                    }`}>
+>>>>>>> origin/main
                     <Briefcase
                       size={24}
                       className={`mx-auto mb-3 ${
@@ -485,8 +553,12 @@ const AuthPage = () => {
                 </label>
                 <Link
                   to="/forgot-password"
+<<<<<<< HEAD
                   className="text-sm text-emerald-400 hover:text-emerald-300 transition"
                 >
+=======
+                  className="text-sm text-emerald-400 hover:text-emerald-300 transition">
+>>>>>>> origin/main
                   Forgot Password?
                 </Link>
               </div>
@@ -499,8 +571,12 @@ const AuthPage = () => {
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
+<<<<<<< HEAD
                   className="flex items-start gap-3 rounded-2xl border border-red-500/20 bg-red-500/10 p-4"
                 >
+=======
+                  className="flex items-start gap-3 rounded-2xl border border-red-500/20 bg-red-500/10 p-4">
+>>>>>>> origin/main
                   <XCircle
                     size={20}
                     className="mt-0.5 text-red-400 flex-shrink-0"
@@ -523,8 +599,12 @@ const AuthPage = () => {
               disabled={
                 loading || (!isLogin && form.password !== confirmPassword)
               }
+<<<<<<< HEAD
               className="flex w-full items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 py-3 font-semibold text-white shadow-xl transition hover:shadow-emerald-500/30 disabled:opacity-70 disabled:cursor-not-allowed"
             >
+=======
+              className="flex w-full items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 py-3 font-semibold text-white shadow-xl transition hover:shadow-emerald-500/30 disabled:opacity-70 disabled:cursor-not-allowed">
+>>>>>>> origin/main
               {loading ? (
                 <>
                   <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -551,8 +631,12 @@ const AuthPage = () => {
             <div className="grid gap-3">
               <button
                 type="button"
+<<<<<<< HEAD
                 className="rounded-2xl border border-white/10 bg-white/5 py-3 text-white transition hover:bg-white/10 flex items-center justify-center gap-2"
               >
+=======
+                className="rounded-2xl border border-white/10 bg-white/5 py-3 text-white transition hover:bg-white/10 flex items-center justify-center gap-2">
+>>>>>>> origin/main
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
                   <path
                     fill="#fff"
@@ -575,6 +659,7 @@ const AuthPage = () => {
               </button>
               <button
                 type="button"
+<<<<<<< HEAD
                 className="rounded-2xl border border-white/10 bg-white/5 py-3 text-white transition hover:bg-white/10 flex items-center justify-center gap-2"
               >
                 <svg
@@ -582,6 +667,13 @@ const AuthPage = () => {
                   fill="currentColor"
                   viewBox="0 0 24 24"
                 >
+=======
+                className="rounded-2xl border border-white/10 bg-white/5 py-3 text-white transition hover:bg-white/10 flex items-center justify-center gap-2">
+                <svg
+                  className="w-5 h-5"
+                  fill="currentColor"
+                  viewBox="0 0 24 24">
+>>>>>>> origin/main
                   <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.468-2.38 1.235-3.22-.123-.3-.535-1.52.117-3.16 0 0 1.008-.322 3.3 1.23.96-.267 1.98-.399 3-.399s2.04.132 3 .399c2.292-1.552 3.3-1.23 3.3-1.23.653 1.64.24 2.86.118 3.16.768.84 1.233 1.91 1.233 3.22 0 4.61-2.804 5.62-5.476 5.92.43.37.824 1.102.824 2.22 0 1.602-.015 2.894-.015 3.287 0 .322.216.694.825.577C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
                 </svg>
                 Continue with GitHub
@@ -594,15 +686,23 @@ const AuthPage = () => {
                 By continuing you agree to our
                 <Link
                   to="/terms"
+<<<<<<< HEAD
                   className="text-emerald-400 hover:text-emerald-300 mx-1 transition"
                 >
+=======
+                  className="text-emerald-400 hover:text-emerald-300 mx-1 transition">
+>>>>>>> origin/main
                   Terms
                 </Link>
                 and
                 <Link
                   to="/privacy"
+<<<<<<< HEAD
                   className="text-emerald-400 hover:text-emerald-300 mx-1 transition"
                 >
+=======
+                  className="text-emerald-400 hover:text-emerald-300 mx-1 transition">
+>>>>>>> origin/main
                   Privacy Policy
                 </Link>
               </p>

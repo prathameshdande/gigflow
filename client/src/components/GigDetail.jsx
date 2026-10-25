@@ -19,7 +19,10 @@ import {
 import { motion } from "framer-motion";
 
 import { API_URL } from "../api/config";
+<<<<<<< HEAD
 import { fetchWithRetry } from "../utils/fetchWithRetry";
+=======
+>>>>>>> origin/main
 import { loadRazorpayScript } from "../utils/loadRazorpay";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
@@ -67,6 +70,7 @@ const GigDetail = () => {
 
   const fetchGig = async () => {
     try {
+<<<<<<< HEAD
       const res = await fetchWithRetry(`${API_URL}/gigs/${id}`, {
         credentials: "include",
       }, 4, 1000);
@@ -74,6 +78,11 @@ const GigDetail = () => {
       if (!res.ok) {
         throw new Error("Gig not found or server error");
       }
+=======
+      const res = await fetch(`${API_URL}/gigs/${id}`, {
+        credentials: "include",
+      });
+>>>>>>> origin/main
 
       const data = await res.json();
       setGig(data);
@@ -98,7 +107,11 @@ const GigDetail = () => {
 
     try {
       if (isOwner) {
+<<<<<<< HEAD
         const res = await fetchWithRetry(`${API_URL}/bids/${id}`, {
+=======
+        const res = await fetch(`${API_URL}/bids/${id}`, {
+>>>>>>> origin/main
           credentials: "include",
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
@@ -107,7 +120,11 @@ const GigDetail = () => {
           setBids(data);
         }
       } else if (user.role === "freelancer") {
+<<<<<<< HEAD
         const res = await fetchWithRetry(`${API_URL}/bids/my/${id}`, {
+=======
+        const res = await fetch(`${API_URL}/bids/my/${id}`, {
+>>>>>>> origin/main
           credentials: "include",
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
