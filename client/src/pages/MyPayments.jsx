@@ -39,7 +39,33 @@ const MyPayments = () => {
 
   useEffect(() => {
     if (!user) return;
-    fetchPayments();
+    let cancelled = false;
+
+    fetch(`${API_URL}/payments/my`, {
+      credentials: "include",
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+    })
+      .then(async (res) => {
+        const data = await res.json();
+        if (cancelled) return;
+        if (!res.ok) {
+          throw new Error(data.message || "Failed to load payments");
+        }
+        setPayments(Array.isArray(data) ? data : []);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        console.error(err);
+        setError(err.message);
+        setPayments([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [user]);
 
   const confirmPayment = async (paymentId) => {

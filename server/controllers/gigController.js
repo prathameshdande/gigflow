@@ -56,15 +56,11 @@ exports.getGigs = async (req, res, next) => {
 
     const [gigs, total] = await Promise.all([
       gigsQuery,
-<<<<<<< HEAD
-      paginated ? Gig.countDocuments(filter) : Promise.resolve(0),
-=======
       paginated
         ? search
           ? Gig.countDocuments(filter)
           : Gig.estimatedDocumentCount()
         : Promise.resolve(0),
->>>>>>> origin/main
     ]);
 
     // Keep the legacy unpaginated response for older clients. The current

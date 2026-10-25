@@ -14,12 +14,10 @@ import {
   EyeOff,
   CheckCircle2,
   XCircle,
-<<<<<<< HEAD
   Star,
   MessageSquare,
   UserCheck,
-=======
->>>>>>> origin/main
+
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import api from "../api/axios";
@@ -208,7 +206,6 @@ const ProfilePage = () => {
           {[
             {
               label: "Rating",
-<<<<<<< HEAD
               value: avgRating ? `${avgRating} / 5` : "No ratings yet",
               icon: Star,
               color: "text-amber-400",
@@ -219,18 +216,12 @@ const ProfilePage = () => {
               icon: MessageSquare,
               color: "text-blue-500",
             },
-=======
-              value: avgRating ? `${avgRating} ★` : "No ratings yet",
-              icon: "⭐",
-            },
-            { label: "Reviews", value: String(reviewCount), icon: "💬" },
->>>>>>> origin/main
+
             {
               label: "Member Since",
               value: profile.createdAt
                 ? new Date(profile.createdAt).getFullYear()
                 : "-",
-<<<<<<< HEAD
               icon: Calendar,
               color: "text-emerald-500",
             },
@@ -262,28 +253,7 @@ const ProfilePage = () => {
               </motion.div>
             );
           })}
-=======
-              icon: "📅",
-            },
-            { label: "Role", value: profile.role || "-", icon: "🧑‍💻" },
-          ].map((stat, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 * i }}
-              whileHover={{ y: -5 }}
-              className="rounded-3xl border border-white/10 bg-white p-6 shadow-xl dark:bg-zinc-900">
-              <div className="text-2xl">{stat.icon}</div>
-              <div className="mt-2 text-2xl font-bold dark:text-white">
-                {stat.value}
-              </div>
-              <div className="text-sm text-zinc-500 dark:text-zinc-400">
-                {stat.label}
-              </div>
-            </motion.div>
-          ))}
->>>>>>> origin/main
+
         </div>
 
         {/* About & Achievements */}

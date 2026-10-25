@@ -1,9 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { API_URL } from "../api/config";
-<<<<<<< HEAD
 import { fetchWithRetry } from "../utils/fetchWithRetry";
-=======
->>>>>>> origin/main
 
 const AuthContext = createContext();
 
@@ -40,7 +37,6 @@ export const AuthProvider = ({ children }) => {
   // the account could have been deactivated since the last visit).
   useEffect(() => {
     const restoreSession = async () => {
-<<<<<<< HEAD
       if (!token && !user) {
         setLoading(false);
         return;
@@ -65,31 +61,16 @@ export const AuthProvider = ({ children }) => {
             setUser(null);
             setToken(null);
           }
-=======
-      try {
-        const res = await fetch(`${API_URL}/auth/me`, {
-          credentials: "include",
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
 
-        if (!res.ok) {
-          setUser(null);
-          setToken(null);
->>>>>>> origin/main
           return;
         }
 
         const data = await res.json();
         setUser(data);
       } catch (err) {
-<<<<<<< HEAD
         // Network / cold-start error - keep the cached user so the app still works
         console.error("Session restore notice:", err);
-=======
-        // Network error - keep the cached user so the app still works
-        // offline-ish, but don't crash.
-        console.error(err);
->>>>>>> origin/main
+
       } finally {
         setLoading(false);
       }

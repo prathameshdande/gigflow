@@ -24,39 +24,39 @@ const sidebarLinks = [
   { to: "/admin/reviews", icon: Star, label: "Reviews" },
 ];
 
+const SidebarContent = ({ location, setMobileOpen }) => (
+  <>
+    <div className="flex items-center gap-2 text-xl font-bold">
+      <LayoutDashboard /> Admin Panel
+    </div>
+    <nav className="space-y-2">
+      {sidebarLinks.map((link) => (
+        <Link
+          key={link.to}
+          to={link.to}
+          onClick={() => setMobileOpen(false)}
+          className={`flex items-center gap-2 p-2 rounded-lg hover:bg-slate-700 ${
+            location.pathname === link.to ? "bg-slate-700" : ""
+          }`}
+        >
+          <link.icon size={18} /> {link.label}
+        </Link>
+      ))}
+      {/* Exit admin link */}
+      <Link
+        to="/"
+        onClick={() => setMobileOpen(false)}
+        className="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-700 text-slate-400 mt-8"
+      >
+        <ArrowLeft size={18} /> Exit Admin
+      </Link>
+    </nav>
+  </>
+);
+
 const AdminDashboard = () => {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
-
-  const SidebarContent = () => (
-    <>
-      <div className="flex items-center gap-2 text-xl font-bold">
-        <LayoutDashboard /> Admin Panel
-      </div>
-      <nav className="space-y-2">
-        {sidebarLinks.map((link) => (
-          <Link
-            key={link.to}
-            to={link.to}
-            onClick={() => setMobileOpen(false)}
-            className={`flex items-center gap-2 p-2 rounded-lg hover:bg-slate-700 ${
-              location.pathname === link.to ? "bg-slate-700" : ""
-            }`}
-          >
-            <link.icon size={18} /> {link.label}
-          </Link>
-        ))}
-        {/* Exit admin link */}
-        <Link
-          to="/"
-          onClick={() => setMobileOpen(false)}
-          className="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-700 text-slate-400 mt-8"
-        >
-          <ArrowLeft size={18} /> Exit Admin
-        </Link>
-      </nav>
-    </>
-  );
 
   return (
     <div className="min-h-screen lg:flex">
@@ -121,7 +121,7 @@ const AdminDashboard = () => {
 
       {/* Desktop sidebar */}
       <aside className="hidden w-64 shrink-0 space-y-6 bg-slate-900 p-4 text-white lg:block">
-        <SidebarContent />
+        <SidebarContent location={location} setMobileOpen={setMobileOpen} />
       </aside>
 
       {/* Main content */}

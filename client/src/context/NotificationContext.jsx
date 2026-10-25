@@ -110,7 +110,7 @@ export const NotificationProvider = ({ children }) => {
       }
       if (socketRef.current === socket) socketRef.current = null;
     };
-  }, [token, user?._id, loadNotifications]);
+  }, [token, user, loadNotifications]);
 
   return (
     <NotificationContext.Provider

@@ -3,6 +3,21 @@ import { Bell, CheckCheck } from "lucide-react";
 import { useNotifications } from "../context/NotificationContext";
 import { useNavigate } from "react-router-dom";
 
+const formatTime = (date) => {
+  const diff = Math.floor((Date.now() - new Date(date)) / 1000);
+
+  if (diff < 60) return "Just now";
+
+  const mins = Math.floor(diff / 60);
+  if (mins < 60) return `${mins} min${mins > 1 ? "s" : ""} ago`;
+
+  const hrs = Math.floor(diff / 3600);
+  if (hrs < 24) return `${hrs} hour${hrs > 1 ? "s" : ""} ago`;
+
+  const days = Math.floor(diff / 86400);
+  return `${days} day${days > 1 ? "s" : ""} ago`;
+};
+
 export default function NotificationBell() {
   const { notifications, markAsRead, markAllAsRead } =
     useNotifications();
@@ -29,23 +44,6 @@ export default function NotificationBell() {
       () => notifications.filter((n) => !n.isRead).length,
       [notifications]
   );
-
-  const formatTime = (date) => {
-    const diff = Math.floor((Date.now() - new Date(date)) / 1000);
-
-    if (diff < 60) return "Just now";
-
-    const mins = Math.floor(diff / 60);
-    if (mins < 60)
-        return `${mins} min${mins > 1 ? "s" : ""} ago`;
-
-    const hrs = Math.floor(diff / 3600);
-    if (hrs < 24)
-        return `${hrs} hour${hrs > 1 ? "s" : ""} ago`;
-
-    const days = Math.floor(diff / 86400);
-    return `${days} day${days > 1 ? "s" : ""} ago`;
-  };
 
   const handleNotificationClick = async (notification) => {
     await markAsRead(notification._id);

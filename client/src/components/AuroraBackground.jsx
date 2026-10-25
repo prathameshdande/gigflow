@@ -28,18 +28,13 @@ const AuroraBackground = () => {
   const { theme } = useTheme();
 
   return (
-<<<<<<< HEAD
     <div className="fixed inset-0 -z-50 overflow-hidden pointer-events-none">
-=======
-    <div className="fixed inset-0 -z-50 overflow-hidden">
->>>>>>> origin/main
       <div
         className={`absolute inset-0 transition-all duration-700 ${
           theme === "dark" ? "bg-[#05060B]" : "bg-[#F7F9FC]"
         }`}
       />
 
-<<<<<<< HEAD
       {/* Modern tech background wallpaper */}
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-700 opacity-20 dark:opacity-35"
@@ -49,8 +44,6 @@ const AuroraBackground = () => {
         }}
       />
 
-=======
->>>>>>> origin/main
       {blobs.map((blob) => (
         <div
           key={`${blob.size}-${blob.left || blob.right}`}

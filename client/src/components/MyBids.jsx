@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { API_URL } from "../api/config";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -28,12 +28,7 @@ const MyBids = () => {
   const [editing, setEditing] = useState(null);
   const [editForm, setEditForm] = useState({ price: "", message: "" });
 
-  useEffect(() => {
-    if (!user) return navigate("/auth");
-    fetchBids();
-  }, [user, navigate]);
-
-  const fetchBids = async () => {
+  const fetchBids = useCallback(async () => {
     try {
       const res = await fetch(`${API_URL}/bids/my`, {
         credentials: "include",
@@ -52,7 +47,13 @@ const MyBids = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [navigate]);
+
+  useEffect(() => {
+    if (!user) return navigate("/auth");
+    fetchBids();
+  }, [user, navigate, fetchBids]);
+
 
   const withdrawBid = async (id) => {
     if (!confirm("Withdraw this bid?")) return;
